@@ -19,6 +19,7 @@ The format follows Keep a Changelog. A version and release date will be assigned
 
 ### Changed
 
+- Moved detailed PSR-18 setup out of the main README and into dedicated advanced configuration documentation.
 - Set the canonical versioned API base URL to `https://viewmend.com/api/v1` and made module paths relative to it.
 - Moved the Site Tracker integration ID from general client configuration to `siteTracker($integrationId)`.
 - Replaced manual `SdkConfig`, HTTP client, factory, enum, and event-object assembly with the one-import `ViewMend` entry point.

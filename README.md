@@ -106,34 +106,9 @@ All SDK failures extend `ViewMend\Exception\ViewMendException`. Significant API 
 
 Exception messages and SDK log context do not include authorization headers, API tokens, or raw response bodies.
 
-## Advanced PSR-18 injection
+## Advanced configuration
 
-Applications that already manage HTTP infrastructure can inject any PSR-18 client and PSR-17 request and stream factories:
-
-```php
-use ViewMend\ViewMend;
-
-$viewmend = ViewMend::withPsr18(
-    token: $token,
-    httpClient: $psr18Client,
-    requestFactory: $psr17RequestFactory,
-    streamFactory: $psr17StreamFactory,
-);
-```
-
-The injected transport receives the same authentication, retry, response mapping, and redaction behavior as the default Guzzle transport.
-
-For tests or self-hosted installations, the advanced factories accept a versioned `apiBaseUrl` override:
-
-```php
-$viewmend = ViewMend::withPsr18(
-    token: $token,
-    httpClient: $psr18Client,
-    requestFactory: $psr17RequestFactory,
-    streamFactory: $psr17StreamFactory,
-    apiBaseUrl: 'https://self-hosted.example/api/v1',
-);
-```
+The SDK uses Guzzle by default. Applications that manage their own HTTP infrastructure can inject a PSR-18 client and PSR-17 factories. See [Advanced configuration](docs/advanced-configuration.md).
 
 ## Development
 

@@ -52,7 +52,7 @@ Core transport, configuration, validation, and retry behavior know nothing about
 
 `ViewMend::client(token: ...)` creates Guzzle and its PSR-17 factories internally. Guzzle is a production dependency so a normal `composer require viewmend/sdk` installation is immediately usable.
 
-`ViewMend::withPsr18()` accepts any PSR-18 client and PSR-17 request and stream factories for Laravel integration, tests, self-hosted deployments, or applications with managed HTTP infrastructure. Both factories produce the same internal transport stack and behavior.
+`ViewMend::withPsr18()` accepts any PSR-18 client and PSR-17 request and stream factories for Laravel integration, tests, self-hosted deployments, or applications with managed HTTP infrastructure. Both factories produce the same internal transport stack and behavior. The consumer-facing setup is documented separately in [advanced configuration](advanced-configuration.md) so the main README remains focused on the default workflow.
 
 The default logger is `Psr\Log\NullLogger`.
 
