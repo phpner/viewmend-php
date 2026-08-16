@@ -6,9 +6,7 @@ No public version has been released. A supported-version matrix will be added wi
 
 ## Reporting a vulnerability
 
-A dedicated vulnerability-reporting address will be published before the first public release.
-
-During pre-release development, report suspected vulnerabilities privately to the project maintainers through the established project communication channel. Include the affected version or commit, impact, reproduction steps, and any proposed mitigation. Never include production API tokens, authorization headers, customer payloads, or other credentials.
+A private vulnerability-reporting contact has not yet been designated and is required before the first public release. Until then, do not publish sensitive vulnerability details or credentials in a public issue.
 
 ## Credential handling
 

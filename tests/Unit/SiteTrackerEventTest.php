@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace ViewMend\Tests\Unit;
 
-use DateTimeImmutable;
 use JsonSerializable;
 use PHPUnit\Framework\TestCase;
-use stdClass;
 use ViewMend\Exception\ValidationException;
 use ViewMend\Internal\SiteTracker\Event\EventId;
 use ViewMend\Internal\SiteTracker\Event\EventType;
@@ -29,26 +27,6 @@ final class SiteTrackerEventTest extends TestCase
             'maintenance',
             'custom',
         ], array_column(EventType::cases(), 'value'));
-    }
-
-    public function testBuilderCreatesACompleteImmutableEvent(): void
-    {
-        $event = SiteTrackerEvent::builder('deploy-42', EventType::Deployment, 'Homepage deployed')
-            ->occurredAt(new DateTimeImmutable('2026-08-16T12:00:00+00:00'))
-            ->siteUrl('https://example.com')
-            ->pageUrls('https://example.com/', 'https://example.com/pricing')
-            ->environment('production')
-            ->description('Published the release.')
-            ->referenceUrl('https://example.com/releases/42')
-            ->changedFields('content', 'metadata')
-            ->metadata(['commit' => 'abc123'])
-            ->build();
-
-        self::assertSame('deploy-42', $event->eventId->value);
-        self::assertSame(EventType::Deployment, $event->eventType);
-        self::assertSame('https://example.com/pricing', $event->pageUrls[1]->value);
-        self::assertSame(['content', 'metadata'], $event->changedFields);
-        self::assertInstanceOf(stdClass::class, $event->metadata?->value());
     }
 
     public function testEventIdUsesUnicodeCharacterLength(): void

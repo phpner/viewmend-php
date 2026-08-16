@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace ViewMend;
 
-use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\Psr7\HttpFactory;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
@@ -13,6 +12,7 @@ use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use ViewMend\Internal\Config\ClientConfig;
 use ViewMend\Internal\Contracts\Http\TransportInterface;
+use ViewMend\Internal\Http\DefaultGuzzleClientFactory;
 use ViewMend\Internal\Http\Psr18Transport;
 use ViewMend\Internal\Http\RetryingTransport;
 use ViewMend\Internal\Retry\ExponentialBackoffRetryPolicy;
@@ -36,7 +36,7 @@ final readonly class ViewMend
 
         return self::withPsr18(
             token: $token,
-            httpClient: new GuzzleClient(),
+            httpClient: DefaultGuzzleClientFactory::create(),
             requestFactory: $factory,
             streamFactory: $factory,
         );

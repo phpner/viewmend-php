@@ -6,15 +6,17 @@ This SDK lets a PHP application send that change context to ViewMend. The event 
 
 [Learn more about ViewMend Site Tracker](https://viewmend.com/site-tracker)
 
-> A public license has not yet been selected. Packagist distribution and release tags will begin after licensing is finalized.
+> A public license has not yet been selected. The package is not currently published on Packagist.
 
 ## Installation
+
+After the first approved release is published on Packagist, install it with:
 
 ```bash
 composer require viewmend/sdk
 ```
 
-That command installs everything required to send events. Guzzle is included as the SDK's default HTTP transport; application code does not need to install, configure, or import it.
+Guzzle is included as the SDK's default HTTP transport; application code does not need to install, configure, or import it.
 
 ## Quick Start
 
@@ -27,10 +29,17 @@ use ViewMend\ViewMend;
 
 require __DIR__ . '/vendor/autoload.php';
 
-$token = $_ENV['VIEWMEND_API_TOKEN']
-    ?? throw new \RuntimeException('VIEWMEND_API_TOKEN is required.');
-$integrationId = $_ENV['VIEWMEND_INTEGRATION_ID']
-    ?? throw new \RuntimeException('VIEWMEND_INTEGRATION_ID is required.');
+$token = getenv('VIEWMEND_API_TOKEN');
+if ($token === false || trim($token) === '') {
+    throw new \RuntimeException('VIEWMEND_API_TOKEN is required.');
+}
+$token = trim($token);
+
+$integrationId = getenv('VIEWMEND_INTEGRATION_ID');
+if ($integrationId === false || trim($integrationId) === '') {
+    throw new \RuntimeException('VIEWMEND_INTEGRATION_ID is required.');
+}
+$integrationId = trim($integrationId);
 
 $viewmend = ViewMend::client(token: $token);
 

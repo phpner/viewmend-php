@@ -2,9 +2,7 @@
 
 ## Status
 
-This document records the pre-release architecture of `viewmend/sdk`. A public license has not yet been selected, so Packagist distribution and release tags remain disabled until licensing is finalized.
-
-The original manual-construction API was replaced before the first public release. No compatibility shim is retained: consumers start from `ViewMend\ViewMend`, while implementation classes live under `ViewMend\Internal`.
+This document records the architecture of `viewmend/sdk`. A public license has not yet been selected, so Packagist distribution and release tags remain blocked until licensing is finalized.
 
 ## Runtime baseline
 
@@ -14,7 +12,7 @@ Every PHP file uses strict types. The source tree uses PSR-4 and PSR-12.
 
 ## Product scope
 
-The repository is a general ViewMend SDK with Site Tracker Events as its first product module. Page Audit, Page Promise, and AI Visibility may become independent modules only after their real API contracts exist; there are no speculative placeholders for them.
+The repository is the general ViewMend SDK, with Site Tracker Events as its first implemented product module. Additional product modules must remain isolated and may be added only for documented API contracts.
 
 Laravel integration will live in `viewmend/laravel` and depend on this package. Laravel and WordPress code are outside this repository.
 
@@ -50,11 +48,13 @@ Core transport, configuration, validation, and retry behavior know nothing about
 
 ## Transport construction
 
-`ViewMend::client(token: ...)` creates Guzzle and its PSR-17 factories internally. Guzzle is a production dependency so a normal `composer require viewmend/sdk` installation is immediately usable.
+`ViewMend::client(token: ...)` creates Guzzle and its PSR-17 factories internally. Guzzle is a production dependency, so consumers do not need to select or configure a transport for the default workflow.
 
 `ViewMend::withPsr18()` accepts any PSR-18 client and PSR-17 request and stream factories for Laravel integration, tests, self-hosted deployments, or applications with managed HTTP infrastructure. Both factories produce the same internal transport stack and behavior. The consumer-facing setup is documented separately in [advanced configuration](advanced-configuration.md) so the main README remains focused on the default workflow.
 
 The default logger is `Psr\Log\NullLogger`.
+
+The default Guzzle client uses a 3-second connection timeout and a 10-second total timeout per attempt. TLS verification remains enabled and redirects are disabled. With at most three attempts and the default exponential backoff, a timeout-only failure is bounded to approximately 31 seconds.
 
 ## API URL composition
 

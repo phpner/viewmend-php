@@ -79,11 +79,6 @@ final readonly class SiteTrackerEvent
         return new self(new EventId($eventId), $eventType, $title);
     }
 
-    public static function builder(string $eventId, EventType $eventType, string $title): SiteTrackerEventBuilder
-    {
-        return new SiteTrackerEventBuilder(new EventId($eventId), $eventType, $title);
-    }
-
     public function withOccurredAt(DateTimeImmutable $occurredAt): self
     {
         return $this->copy(occurredAt: $occurredAt);
