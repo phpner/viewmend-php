@@ -13,6 +13,11 @@
         "viewmend",
         "website-monitoring"
     ],
+    "support": {
+        "email": "support@viewmend.com",
+        "issues": "https://github.com/phpner/viewmend-php/issues",
+        "source": "https://github.com/phpner/viewmend-php"
+    },
     "require": {
         "php": ">=8.3",
         "guzzlehttp/guzzle": "^7.9",

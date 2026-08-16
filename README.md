@@ -10,11 +10,9 @@ Site Tracker Events is the first and currently only available SDK module. PHP ap
 
 Learn more about [ViewMend Site Tracker for website change monitoring](https://viewmend.com/site-tracker).
 
-> The package is prepared for its first public release and is not yet published on Packagist.
-
 ## Installation
 
-After the first approved release is published on Packagist, install it with:
+Install the SDK with Composer:
 
 ```bash
 composer require viewmend/sdk
