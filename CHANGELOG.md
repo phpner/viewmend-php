@@ -2,9 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
-The format follows Keep a Changelog. A version and release date will be assigned with the first public release.
+The format follows Keep a Changelog.
 
-## Unreleased
+## 1.0.0 - 2026-08-16
 
 ### Added
 

@@ -2,6 +2,7 @@
     "name": "viewmend/sdk",
     "description": "Official framework-agnostic PHP SDK for ViewMend APIs, including Site Tracker website change events.",
     "homepage": "https://viewmend.com/",
+    "license": "MIT",
     "type": "library",
     "keywords": [
         "api-client",
@@ -51,8 +52,5 @@
         "allow-plugins": false,
         "preferred-install": "dist",
         "sort-packages": true
-    },
-    "extra": {
-        "license-status": "pending"
     }
 }

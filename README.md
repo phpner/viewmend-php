@@ -10,7 +10,7 @@ Site Tracker Events is the first and currently only available SDK module. PHP ap
 
 Learn more about [ViewMend Site Tracker for website change monitoring](https://viewmend.com/site-tracker).
 
-> A public license has not yet been selected. The package is not currently published on Packagist.
+> The package is prepared for its first public release and is not yet published on Packagist.
 
 ## Installation
 
@@ -121,6 +121,10 @@ Exception messages and SDK log context do not include authorization headers, API
 ## Advanced configuration
 
 The SDK uses Guzzle by default. Applications that manage their own HTTP infrastructure can inject a PSR-18 client and PSR-17 factories. See [Advanced configuration](docs/advanced-configuration.md).
+
+## License
+
+The ViewMend PHP SDK is available under the [MIT License](LICENSE).
 
 ## Development
 
