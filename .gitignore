@@ -1,0 +1,8 @@
+/vendor/
+/.idea/
+/.phpstan-cache/
+/.phpunit.cache/
+/.phpcs-cache
+/.phpunit.result.cache
+/coverage/
+.DS_Store

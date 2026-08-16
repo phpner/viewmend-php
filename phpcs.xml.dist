@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<ruleset name="ViewMend SDK">
+    <description>PSR-12 rules for the ViewMend PHP SDK.</description>
+    <file>src</file>
+    <file>tests</file>
+    <arg name="colors"/>
+    <arg name="parallel" value="8"/>
+    <arg value="p"/>
+    <rule ref="PSR12"/>
+</ruleset>
