@@ -1,10 +1,14 @@
 # ViewMend PHP SDK
 
-ViewMend Site Tracker monitors changes to selected website pages. Deployment, content, cache, and maintenance events can be linked to the checks that follow them, making it easier to understand what changed and why.
+The ViewMend PHP SDK is the official framework-agnostic PHP client for ViewMend APIs. It provides shared authentication and configuration, a production-ready HTTP transport, safe retries, typed errors, and isolated product modules for integrating PHP applications with the [ViewMend website monitoring platform](https://viewmend.com/).
 
-This SDK lets a PHP application send that change context to ViewMend. The event then appears in the shared Events and Timeline workflow and can trigger checks for affected tracked pages.
+## Available modules
 
-[Learn more about ViewMend Site Tracker](https://viewmend.com/site-tracker)
+### Site Tracker Events
+
+Site Tracker Events is the first and currently only available SDK module. PHP applications can send deployment events, content updates, cache clears, and maintenance activity to ViewMend, which connects that change context with subsequent checks of tracked pages in the Events and Timeline workflow.
+
+Learn more about [ViewMend Site Tracker for website change monitoring](https://viewmend.com/site-tracker).
 
 > A public license has not yet been selected. The package is not currently published on Packagist.
 
@@ -19,6 +23,8 @@ composer require viewmend/sdk
 Guzzle is included as the SDK's default HTTP transport; application code does not need to install, configure, or import it.
 
 ## Quick Start
+
+This example uses Site Tracker Events, the first available product module:
 
 ```php
 <?php

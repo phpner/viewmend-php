@@ -1,12 +1,16 @@
 {
     "name": "viewmend/sdk",
-    "description": "Framework-agnostic PHP SDK for ViewMend APIs.",
-    "homepage": "https://viewmend.com/site-tracker",
+    "description": "Official framework-agnostic PHP SDK for ViewMend APIs, including Site Tracker website change events.",
+    "homepage": "https://viewmend.com/",
     "type": "library",
     "keywords": [
+        "api-client",
+        "change-monitoring",
+        "deployment-monitoring",
         "php-sdk",
         "site-tracker",
-        "viewmend"
+        "viewmend",
+        "website-monitoring"
     ],
     "require": {
         "php": ">=8.3",
