@@ -50,9 +50,19 @@ final readonly class PendingEvent
         return new self($this->sender, $this->event->withReferenceUrl(new HttpUrl($url)));
     }
 
-    public function changedFields(string ...$changedFields): self
+    public function contentChanged(): self
     {
-        return new self($this->sender, $this->event->withChangedFields(array_values($changedFields)));
+        return $this->fieldChanged('content');
+    }
+
+    public function metadataChanged(): self
+    {
+        return $this->fieldChanged('metadata');
+    }
+
+    public function customFieldChanged(string $field): self
+    {
+        return $this->fieldChanged($field);
     }
 
     /** @param array<mixed>|object $metadata */
@@ -64,5 +74,13 @@ final readonly class PendingEvent
     public function send(): DeliveryResult
     {
         return $this->sender->send($this->event);
+    }
+
+    private function fieldChanged(string $field): self
+    {
+        return new self(
+            $this->sender,
+            $this->event->withChangedFields([...$this->event->changedFields, $field]),
+        );
     }
 }

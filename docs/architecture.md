@@ -76,6 +76,8 @@ An `apiBaseUrl` override is available for tests, self-hosted installations, and 
 
 Semantic methods such as `deployment()`, `contentUpdate()`, and `maintenance()` choose a valid API event type without requiring an enum import. They return an immutable `PendingEvent`. Fluent methods return a new valid pending value; only `send()` performs I/O.
 
+Known changed-field values use semantic methods such as `contentChanged()` and `metadataChanged()` so consumers do not repeat protocol strings. `customFieldChanged()` preserves support for application-specific and future field names without putting Site Tracker constants on the root SDK client.
+
 Internally, the fluent surface creates and evolves a validated immutable `SiteTrackerEvent`. The sender serializes the exact v1 JSON contract and returns a typed `DeliveryResult`, never a public associative array.
 
 HTTP 202 represents a newly accepted event and HTTP 200 a duplicate delivery. Counts remain integers, `scheduled_for` becomes an immutable date-time, and unknown `queue_status` values are preserved by `QueueStatus`.

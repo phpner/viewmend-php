@@ -57,7 +57,8 @@ final class SiteTrackerEventsContractTest extends TestCase
             ->environment('production')
             ->description('Published the homepage.')
             ->reference('https://example.com/releases/123')
-            ->changedFields('content', 'metadata')
+            ->contentChanged()
+            ->metadataChanged()
             ->metadata(['commit' => 'abc123'])
             ->send();
 
@@ -98,6 +99,31 @@ final class SiteTrackerEventsContractTest extends TestCase
         self::assertTrue($result->queueStatus->is(QueueStatus::QUEUED));
         self::assertSame('2026-08-16T12:05:00+00:00', $result->scheduledFor?->format(DATE_ATOM));
         self::assertTrue($http->isExhausted());
+    }
+
+    /** @throws JsonException */
+    public function testSerializesAnExplicitCustomChangedField(): void
+    {
+        $http = new SequenceHttpClient([$this->successResponse()]);
+
+        $this->sdk($http, $this->token())
+            ->siteTracker('integration-id')
+            ->events()
+            ->custom('custom-1', 'Schema changed')
+            ->customFieldChanged('product_schema')
+            ->send();
+
+        $payload = json_decode(
+            (string) $http->requests[0]->getBody(),
+            true,
+            512,
+            JSON_THROW_ON_ERROR,
+        );
+        if (!is_array($payload)) {
+            self::fail('Expected the request body to contain a JSON object.');
+        }
+
+        self::assertSame(['product_schema'], $payload['changed_fields'] ?? null);
     }
 
     public function testParsesDuplicateResponseWithoutCreatingASecondClientEvent(): void

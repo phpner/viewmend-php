@@ -22,7 +22,8 @@ final class PublicApiTest extends TestCase
                 title: 'Homepage deployed',
             )
             ->page('https://example.com')
-            ->changedFields('content', 'metadata');
+            ->contentChanged()
+            ->metadataChanged();
 
         self::assertInstanceOf(PendingEvent::class, $event);
         self::assertSame('https://viewmend.com/api/v1', ViewMend::PRODUCTION_API_BASE_URL);

@@ -64,12 +64,15 @@ $result = $viewmend
     ->environment('production')
     ->description('Published release abc123.')
     ->reference('https://github.com/example/project/actions/runs/123')
-    ->changedFields('content', 'metadata')
+    ->contentChanged()
+    ->metadataChanged()
     ->metadata(['commit' => 'abc123'])
     ->send();
 ```
 
 `site()` identifies the affected site, while each `page()` adds a specific tracked-page URL. Supported semantic event methods are `deployment()`, `contentUpdate()`, `pluginUpdate()`, `themeUpdate()`, `cacheCleared()`, `trackingScriptChange()`, `maintenance()`, and `custom()`.
+
+`contentChanged()` and `metadataChanged()` add the corresponding values to `changed_fields` without relying on error-prone string literals. For a field that does not have a semantic SDK method, use the explicit escape hatch `customFieldChanged('product_schema')`.
 
 Use an event ID that is unique and stable for the originating change. Safe retries send the identical serialized payload and the same event ID. If the server already accepted that ID, it returns a duplicate delivery instead of creating a second event.
 

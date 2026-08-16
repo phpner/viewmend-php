@@ -10,6 +10,7 @@ The format follows Keep a Changelog. A version and release date will be assigned
 
 - Framework-agnostic `ViewMend` client with a ready-to-use Guzzle transport.
 - Fluent Site Tracker event methods with I/O isolated to `send()`.
+- Semantic `contentChanged()` and `metadataChanged()` methods with an explicit custom-field escape hatch.
 - PSR-18/PSR-17 transport adapter with PSR-3 logging and token-safe failure handling.
 - Retry policy for safe PSR-18 network failures, HTTP 429, and transient 500/502/503/504 responses.
 - Immutable Site Tracker Event value objects, builder, v1 Events client, and typed delivery response.
