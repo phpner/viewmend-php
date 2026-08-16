@@ -6,16 +6,16 @@ namespace ViewMend\Tests\Unit;
 
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
-use ViewMend\Core\Exception\ApiException;
-use ViewMend\Core\Exception\AuthenticationException;
-use ViewMend\Core\Exception\EndpointDisabledException;
-use ViewMend\Core\Exception\PayloadTooLargeException;
-use ViewMend\Core\Exception\RateLimitException;
-use ViewMend\Core\Exception\ServerException;
-use ViewMend\Core\Exception\UnexpectedResponseException;
-use ViewMend\Core\Exception\UnprocessableEventException;
-use ViewMend\Core\Http\ApiErrorMapper;
-use ViewMend\Core\Http\HttpResponse;
+use ViewMend\Exception\ApiException;
+use ViewMend\Exception\AuthenticationException;
+use ViewMend\Exception\EndpointDisabledException;
+use ViewMend\Exception\PayloadTooLargeException;
+use ViewMend\Exception\RateLimitException;
+use ViewMend\Exception\ServerException;
+use ViewMend\Exception\UnexpectedResponseException;
+use ViewMend\Exception\UnprocessableEventException;
+use ViewMend\Internal\Http\ApiErrorMapper;
+use ViewMend\Internal\Http\HttpResponse;
 
 final class ApiErrorMapperTest extends TestCase
 {

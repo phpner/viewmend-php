@@ -1,6 +1,7 @@
 {
     "name": "viewmend/sdk",
     "description": "Framework-agnostic PHP SDK for ViewMend APIs.",
+    "homepage": "https://viewmend.com/site-tracker",
     "type": "library",
     "keywords": [
         "php-sdk",
@@ -9,6 +10,7 @@
     ],
     "require": {
         "php": ">=8.3",
+        "guzzlehttp/guzzle": "^7.9",
         "psr/http-client": "^1.0",
         "psr/http-factory": "^1.0",
         "psr/http-message": "^1.1 || ^2.0",

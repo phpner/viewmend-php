@@ -7,11 +7,11 @@ namespace ViewMend\Tests\Unit;
 use DateTimeImmutable;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
-use ViewMend\Core\Exception\NetworkException;
-use ViewMend\Core\Exception\TransportException;
-use ViewMend\Core\Http\HttpRequest;
-use ViewMend\Core\Http\HttpResponse;
-use ViewMend\Core\Retry\ExponentialBackoffRetryPolicy;
+use ViewMend\Exception\NetworkException;
+use ViewMend\Exception\TransportException;
+use ViewMend\Internal\Http\HttpRequest;
+use ViewMend\Internal\Http\HttpResponse;
+use ViewMend\Internal\Retry\ExponentialBackoffRetryPolicy;
 use ViewMend\Tests\Support\FrozenClock;
 
 final class RetryPolicyTest extends TestCase

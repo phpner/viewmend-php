@@ -1,78 +1,83 @@
 # ViewMend PHP SDK
 
-Framework-agnostic PHP client for ViewMend APIs. The first supported module sends Site Tracker Events through API v1. The SDK uses PSR interfaces and does not depend on Laravel, WordPress, or a concrete HTTP client.
+ViewMend Site Tracker monitors changes to selected website pages. Deployment, content, cache, and maintenance events can be linked to the checks that follow them, making it easier to understand what changed and why.
+
+This SDK lets a PHP application send that change context to ViewMend. The event then appears in the shared Events and Timeline workflow and can trigger checks for affected tracked pages.
+
+[Learn more about ViewMend Site Tracker](https://viewmend.com/site-tracker)
 
 > A public license has not yet been selected. Packagist distribution and release tags will begin after licensing is finalized.
 
-## Requirements
-
-- PHP 8.3 or later
-- a PSR-18 HTTP client
-- PSR-17 request and stream factories
-
 ## Installation
-
-Once the package is distributed through an approved Composer repository:
 
 ```bash
 composer require viewmend/sdk
 ```
 
-Install any compatible PSR-18/PSR-17 implementation if the application does not already provide one. For example, Guzzle provides the client and factories used below:
+That command installs everything required to send events. Guzzle is included as the SDK's default HTTP transport; application code does not need to install, configure, or import it.
 
-```bash
-composer require guzzlehttp/guzzle
-```
-
-The SDK deliberately does not install Guzzle or another transport for production consumers.
-
-## Configuration and Site Tracker Events
+## Quick Start
 
 ```php
 <?php
 
 declare(strict_types=1);
 
-use GuzzleHttp\Client as GuzzleClient;
-use GuzzleHttp\Psr7\HttpFactory;
-use ViewMend\Core\Config\SdkConfig;
-use ViewMend\SiteTracker\Event\EventType;
-use ViewMend\SiteTracker\Event\SiteTrackerEvent;
-use ViewMend\ViewMendClient;
+use ViewMend\ViewMend;
 
 require __DIR__ . '/vendor/autoload.php';
 
-$httpClient = new GuzzleClient();
-$httpFactory = new HttpFactory();
+$token = $_ENV['VIEWMEND_API_TOKEN']
+    ?? throw new \RuntimeException('VIEWMEND_API_TOKEN is required.');
+$integrationId = $_ENV['VIEWMEND_INTEGRATION_ID']
+    ?? throw new \RuntimeException('VIEWMEND_INTEGRATION_ID is required.');
 
-$client = ViewMendClient::create(
-    config: new SdkConfig(
-        apiBaseUrl: 'https://app.viewmend.com',
-        apiToken: getenv('VIEWMEND_API_TOKEN') ?: throw new RuntimeException('Missing token.'),
-        integration: getenv('VIEWMEND_INTEGRATION_ID') ?: throw new RuntimeException('Missing integration ID.'),
-    ),
-    httpClient: $httpClient,
-    requestFactory: $httpFactory,
-    streamFactory: $httpFactory,
-);
+$viewmend = ViewMend::client(token: $token);
 
-$event = SiteTrackerEvent::builder(
-    eventId: 'deploy-2026-08-16-abc123',
-    eventType: EventType::Deployment,
-    title: 'Homepage deployed',
-)
-    ->occurredAt(new DateTimeImmutable('now'))
-    ->siteUrl('https://example.com')
-    ->pageUrls('https://example.com/', 'https://example.com/pricing')
+$result = $viewmend
+    ->siteTracker($integrationId)
+    ->events()
+    ->deployment(
+        id: 'deploy-abc123',
+        title: 'Homepage deployed',
+    )
+    ->send();
+```
+
+The default versioned API base URL is `https://viewmend.com/api/v1`. Creating and enriching an event performs no network request; the side effect occurs only when `send()` is called.
+
+## Add change context
+
+Fluent methods add validated context while keeping the event immutable:
+
+```php
+$result = $viewmend
+    ->siteTracker($integrationId)
+    ->events()
+    ->deployment(
+        id: 'deploy-abc123',
+        title: 'Homepage deployed',
+    )
+    ->site('https://example.com')
+    ->page('https://example.com/')
+    ->page('https://example.com/pricing')
     ->environment('production')
     ->description('Published release abc123.')
-    ->referenceUrl('https://github.com/example/project/actions/runs/123')
+    ->reference('https://github.com/example/project/actions/runs/123')
     ->changedFields('content', 'metadata')
     ->metadata(['commit' => 'abc123'])
-    ->build();
+    ->send();
+```
 
-$result = $client->siteTracker()->events()->send($event);
+`site()` identifies the affected site, while each `page()` adds a specific tracked-page URL. Supported semantic event methods are `deployment()`, `contentUpdate()`, `pluginUpdate()`, `themeUpdate()`, `cacheCleared()`, `trackingScriptChange()`, `maintenance()`, and `custom()`.
 
+Use an event ID that is unique and stable for the originating change. Safe retries send the identical serialized payload and the same event ID. If the server already accepted that ID, it returns a duplicate delivery instead of creating a second event.
+
+## Handle the result
+
+`send()` returns a typed `DeliveryResult`:
+
+```php
 printf(
     "Delivery %s: event %s is %s (%s)\n",
     $result->deliveryId->value,
@@ -82,24 +87,9 @@ printf(
 );
 ```
 
-Use an `event_id` that is unique and stable for the originating event. If a safe retry occurs, the SDK sends the identical serialized payload and the same `event_id`; the server returns HTTP 200 with `duplicate=true` when it has already accepted that identifier.
+`QueueStatus` preserves unknown future values. Use `isKnown()` for display decisions, but retain its raw `value` rather than treating a new server status as a malformed response.
 
-`QueueStatus` preserves unknown future values. Consumers may use `isKnown()` for display logic but should retain and log the raw `value` instead of treating a new status as a broken response.
-
-## Dependency injection
-
-`ViewMendClient::create()` accepts any implementations of:
-
-- `Psr\Http\Client\ClientInterface`
-- `Psr\Http\Message\RequestFactoryInterface`
-- `Psr\Http\Message\StreamFactoryInterface`
-- optionally `Psr\Log\LoggerInterface`
-
-The default logger is `Psr\Log\NullLogger`. The default retry policy makes at most three total attempts for explicitly retry-safe calls. A custom `RetryPolicyInterface`, `ClockInterface`, and `SleeperInterface` can be injected for application policy or deterministic testing.
-
-## Error handling
-
-All SDK failures extend `ViewMend\Core\Exception\ViewMendException`. Significant API statuses have dedicated types:
+All SDK failures extend `ViewMend\Exception\ViewMendException`. Significant API statuses have dedicated exception types:
 
 - `AuthenticationException` for 401
 - `EndpointDisabledException` for 410
@@ -107,11 +97,40 @@ All SDK failures extend `ViewMend\Core\Exception\ViewMendException`. Significant
 - `UnprocessableEventException` for 422
 - `RateLimitException` for exhausted 429 responses
 - `ServerException` for exhausted 5xx responses
-- `NetworkException` (a `TransportException`) for exhausted PSR-18 network failures
-- `TransportException` for other non-retryable PSR-18 transport failures
+- `NetworkException` for exhausted PSR-18 network failures
+- `TransportException` for other non-retryable transport failures
 - `UnexpectedResponseException` for unexpected status codes or malformed successful JSON
 
-Exception messages and SDK log context do not include authorization headers, the API token, or raw response bodies.
+Exception messages and SDK log context do not include authorization headers, API tokens, or raw response bodies.
+
+## Advanced PSR-18 injection
+
+Applications that already manage HTTP infrastructure can inject any PSR-18 client and PSR-17 request and stream factories:
+
+```php
+use ViewMend\ViewMend;
+
+$viewmend = ViewMend::withPsr18(
+    token: $token,
+    httpClient: $psr18Client,
+    requestFactory: $psr17RequestFactory,
+    streamFactory: $psr17StreamFactory,
+);
+```
+
+The injected transport receives the same authentication, retry, response mapping, and redaction behavior as the default Guzzle transport.
+
+For tests or self-hosted installations, the advanced factories accept a versioned `apiBaseUrl` override:
+
+```php
+$viewmend = ViewMend::withPsr18(
+    token: $token,
+    httpClient: $psr18Client,
+    requestFactory: $psr17RequestFactory,
+    streamFactory: $psr17StreamFactory,
+    apiBaseUrl: 'https://self-hosted.example/api/v1',
+);
+```
 
 ## Development
 
@@ -123,4 +142,4 @@ composer cs:check
 composer quality
 ```
 
-Tests use a mock PSR-18 client and never send network traffic or perform real sleeps. Architectural decisions and public boundaries are recorded in [docs/architecture.md](docs/architecture.md).
+Tests use mock PSR-18 clients and never send real network traffic or perform real sleeps. Architectural decisions and public boundaries are recorded in [docs/architecture.md](docs/architecture.md).

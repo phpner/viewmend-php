@@ -2,96 +2,96 @@
 
 ## Status
 
-This document records the initial public architecture of `viewmend/sdk`. A public license has not yet been selected, so Packagist distribution and release tags remain disabled until licensing is finalized.
+This document records the pre-release architecture of `viewmend/sdk`. A public license has not yet been selected, so Packagist distribution and release tags remain disabled until licensing is finalized.
+
+The original manual-construction API was replaced before the first public release. No compatibility shim is retained: consumers start from `ViewMend\ViewMend`, while implementation classes live under `ViewMend\Internal`.
 
 ## Runtime baseline
 
-The minimum runtime is PHP 8.3. According to the [official PHP support matrix](https://www.php.net/supported-versions.php), PHP 8.2 reaches end of security support in December 2026, while PHP 8.3 remains security-supported through December 2027. PHP 8.3 is therefore the practical compatibility floor for a new production SDK without forcing consumers onto the newest runtime. The supported constraint is `>=8.3` so the library can run on later compatible PHP releases.
+The minimum runtime is PHP 8.3. According to the [official PHP support matrix](https://www.php.net/supported-versions.php), PHP 8.2 reaches end of security support in December 2026, while PHP 8.3 remains security-supported through December 2027. PHP 8.3 is therefore the practical compatibility floor for a new production SDK without forcing consumers onto the newest runtime.
 
 Every PHP file uses strict types. The source tree uses PSR-4 and PSR-12.
 
-## Scope
+## Product scope
 
-The repository is a general ViewMend SDK with a reusable Core. Site Tracker Events is the first implemented product module. Page Audit, Page Promise, and AI Visibility may become independent modules only after their real API contracts exist; no empty classes or speculative abstractions are reserved for them.
+The repository is a general ViewMend SDK with Site Tracker Events as its first product module. Page Audit, Page Promise, and AI Visibility may become independent modules only after their real API contracts exist; there are no speculative placeholders for them.
 
 Laravel integration will live in `viewmend/laravel` and depend on this package. Laravel and WordPress code are outside this repository.
+
+## Public API
+
+The supported public surface is intentionally small:
+
+- `ViewMend\ViewMend`: default client factory, advanced PSR factory, and module access.
+- `ViewMend\SiteTracker\SiteTrackerClient`, `Events`, and `PendingEvent`: fluent Site Tracker event construction.
+- `ViewMend\SiteTracker\Response\*`: typed delivery IDs, result, and forward-compatible queue status.
+- `ViewMend\Exception\*`: stable configuration, validation, transport, and API failures.
+- PSR-18, PSR-17, and PSR-3 interfaces used by the advanced factory.
+
+Classes below `ViewMend\Internal` are implementation details and are not compatibility promises.
+
+`ViewMend::client()` is a static named constructor, not a static facade or global service locator. It returns an ordinary immutable client instance and stores no global state.
 
 ## Dependency direction
 
 ```mermaid
 flowchart LR
-    App["Consumer application"] --> Facade["ViewMendClient"]
-    Facade --> SiteTracker["SiteTracker module"]
-    SiteTracker --> Contracts["Core contracts and HTTP DTOs"]
-    Infrastructure["PSR-18 transport adapter"] --> Contracts
-    Infrastructure --> PSR["PSR-18, PSR-17, PSR-7, PSR-3"]
-    Retry["Retry transport decorator"] --> Contracts
-    Retry --> Policy["RetryPolicy, Clock, Sleeper"]
-    Facade --> Infrastructure
+    App["Consumer application"] --> Entry["ViewMend"]
+    Entry --> Tracker["SiteTracker fluent API"]
+    Tracker --> Sender["Internal EventSender"]
+    Sender --> Contract["Internal TransportInterface"]
+    Guzzle["Default Guzzle transport"] --> Adapter["Internal PSR-18 adapter"]
+    Custom["Injected PSR-18 client"] --> Adapter
+    Adapter --> Contract
+    Retry["Internal retry decorator"] --> Contract
 ```
 
-The important constraints are:
+Core transport, configuration, validation, and retry behavior know nothing about Site Tracker. The Site Tracker integration ID is validated only at `siteTracker($integrationId)`; creating the general ViewMend client requires only credentials and transport configuration.
 
-- Core contracts and generic DTOs know nothing about Site Tracker.
-- Site Tracker depends inward on the transport contract; it does not know the concrete PSR-18 client.
-- Infrastructure implements the transport contract and owns PSR message construction, authentication injection, and transport-exception sanitization.
-- Retry is a transport decorator. The module explicitly marks an event request safe to repeat because the server deduplicates it by `event_id`.
+## Transport construction
 
-## Packages and responsibilities
+`ViewMend::client(token: ...)` creates Guzzle and its PSR-17 factories internally. Guzzle is a production dependency so a normal `composer require viewmend/sdk` installation is immediately usable.
 
-- `Core/Config`: validated base URL, integration identifier, and an opaque API token value.
-- `Contracts/Http`: the internal transport seam used by modules.
-- `Core/Http`: generic immutable request/response DTOs, the PSR-18 adapter, and retry decorator.
-- `Core/Retry`: retry policy, clock, and sleeper strategies. The default policy retries network failures, 429, and transient 500/502/503/504 responses only.
-- `Core/Exception`: stable SDK exception hierarchy and HTTP error mapping.
-- `SiteTracker/Event`: immutable event DTOs, event types, URL/event-id value objects, and an optional builder.
-- `SiteTracker/Response`: typed delivery result and forward-compatible queue status value object.
-- `SiteTracker/EventsClient`: serializes the v1 event contract and maps responses.
-- `SiteTracker/SiteTrackerClient`: module entry point exposed by `ViewMendClient`.
+`ViewMend::withPsr18()` accepts any PSR-18 client and PSR-17 request and stream factories for Laravel integration, tests, self-hosted deployments, or applications with managed HTTP infrastructure. Both factories produce the same internal transport stack and behavior.
 
-## Public construction and API
+The default logger is `Psr\Log\NullLogger`.
 
-The package intentionally does not discover or instantiate a concrete HTTP client. A consumer supplies a PSR-18 client and PSR-17 request and stream factories:
+## API URL composition
 
-```php
-$client = ViewMendClient::create(
-    config: new SdkConfig(
-        apiBaseUrl: 'https://app.viewmend.com',
-        apiToken: 'vmt_secret',
-        integration: 'integration-id',
-    ),
-    httpClient: $httpClient,
-    requestFactory: $requestFactory,
-    streamFactory: $streamFactory,
-);
+The canonical versioned API base URL is:
 
-$result = $client->siteTracker()->events()->send($event);
-```
+`https://viewmend.com/api/v1`
 
-`ViewMendClient` is an ordinary object facade. It has no static global state and resolves no services from a container.
+The Site Tracker module owns only its relative resource path:
 
-## Site Tracker Events contract
+`/site-tracker/integrations/{integration}/events`
 
-`EventsClient::send()` posts the same JSON body on every retry to:
+The resulting production endpoint is:
 
-`/api/v1/site-tracker/integrations/{integration}/events`
+`https://viewmend.com/api/v1/site-tracker/integrations/{integration}/events`
 
-The PSR adapter adds `Authorization: Bearer ...`, `Accept: application/json`, and `Content-Type: application/json`. It does not add a timestamp header.
+An `apiBaseUrl` override is available for tests, self-hosted installations, and advanced configuration. The version prefix belongs in `apiBaseUrl`; modules must not duplicate `/api/v1`.
 
-HTTP 202 is a newly accepted event; HTTP 200 is a duplicate delivery. Both produce `DeliveryResult`. The result exposes counts as integers, parses `scheduled_for` as an immutable date-time when present, and retains unknown `queue_status` values through `QueueStatus` rather than rejecting them.
+## Site Tracker event flow
 
-HTTP 401, 410, 413, 422, 429, documented transient 5xx, malformed JSON, and invalid success payloads map to predictable exception types. PSR-18 network failures are distinguished from non-network client/request failures so only the former can be retried. Server response bodies are not copied verbatim into exception messages, which prevents accidental credential or sensitive-payload disclosure.
+Semantic methods such as `deployment()`, `contentUpdate()`, and `maintenance()` choose a valid API event type without requiring an enum import. They return an immutable `PendingEvent`. Fluent methods return a new valid pending value; only `send()` performs I/O.
 
-## Retry semantics
+Internally, the fluent surface creates and evolves a validated immutable `SiteTrackerEvent`. The sender serializes the exact v1 JSON contract and returns a typed `DeliveryResult`, never a public associative array.
 
-The initial request counts as attempt one. The default policy permits at most three total attempts. It uses bounded exponential delay for network failures and transient 5xx responses. For 429 it honors `Retry-After` in delta-seconds or HTTP-date form, bounded by the configured maximum delay. Tests inject a fake sleeper and clock; production uses the system clock and native sleep.
+HTTP 202 represents a newly accepted event and HTTP 200 a duplicate delivery. Counts remain integers, `scheduled_for` becomes an immutable date-time, and unknown `queue_status` values are preserved by `QueueStatus`.
 
-No automatic retry occurs for 401, 410, 413, 422, malformed success responses, or requests not explicitly marked retry-safe.
+## Retry and error semantics
+
+The initial request counts as attempt one. The default policy permits at most three total attempts. It retries explicitly safe event requests for PSR-18 network failures, HTTP 429, and transient 500/502/503/504 responses.
+
+`Retry-After` is honored in delta-seconds or HTTP-date form and bounded by the configured maximum delay. The identical serialized request and event ID are reused on every attempt.
+
+No automatic retry occurs for 401, 410, 413, 422, non-network PSR request failures, malformed success responses, or requests not marked retry-safe.
+
+Server response bodies and authorization data are not copied into exception messages or log context. API tokens are redacted from debug and export output.
 
 ## Dependencies
 
-Production dependencies are only the PSR HTTP client/factory/message and logger interfaces. `psr/log` supplies `NullLogger` as the default logger. A concrete PSR-7 implementation is a development dependency used by contract tests and remains the consumer's choice in production.
+Production dependencies are Guzzle plus the PSR HTTP client, factory, message, and logger interfaces. Guzzle supplies the ready-to-use default client and PSR-17 implementation. The PSR interfaces remain direct dependencies because they are part of the advanced extension API.
 
-## Compatibility policy
-
-Known `event_type` values are a closed client input enum because sending an unsupported type is invalid under API v1. Server-returned queue statuses are open-ended and represented by a validated string value object. Stable response objects are returned instead of associative arrays. Future modules must follow the same dependency direction without changing the Site Tracker public path.
+Development dependencies provide PHPUnit, PHPStan, PSR-12 checks, and an independent PSR-7 implementation for contract tests.

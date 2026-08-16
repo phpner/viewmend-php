@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace ViewMend\Tests\Support;
 
 use DateTimeImmutable;
-use ViewMend\Core\Retry\ClockInterface;
+use ViewMend\Internal\Retry\ClockInterface;
 
 final readonly class FrozenClock implements ClockInterface
 {

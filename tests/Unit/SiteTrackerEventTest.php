@@ -8,12 +8,12 @@ use DateTimeImmutable;
 use JsonSerializable;
 use PHPUnit\Framework\TestCase;
 use stdClass;
-use ViewMend\Core\Exception\ValidationException;
-use ViewMend\SiteTracker\Event\EventId;
-use ViewMend\SiteTracker\Event\EventType;
-use ViewMend\SiteTracker\Event\HttpUrl;
-use ViewMend\SiteTracker\Event\Metadata;
-use ViewMend\SiteTracker\Event\SiteTrackerEvent;
+use ViewMend\Exception\ValidationException;
+use ViewMend\Internal\SiteTracker\Event\EventId;
+use ViewMend\Internal\SiteTracker\Event\EventType;
+use ViewMend\Internal\SiteTracker\Event\HttpUrl;
+use ViewMend\Internal\SiteTracker\Event\Metadata;
+use ViewMend\Internal\SiteTracker\Event\SiteTrackerEvent;
 
 final class SiteTrackerEventTest extends TestCase
 {

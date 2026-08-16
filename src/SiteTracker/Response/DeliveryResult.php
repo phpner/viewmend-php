@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace ViewMend\SiteTracker\Response;
 
 use DateTimeImmutable;
-use ViewMend\Core\Exception\ValidationException;
+use ViewMend\Exception\ValidationException;
 
 final readonly class DeliveryResult
 {

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace ViewMend\Tests\Support;
 
-use ViewMend\Core\Retry\SleeperInterface;
+use ViewMend\Internal\Retry\SleeperInterface;
 
 final class RecordingSleeper implements SleeperInterface
 {
