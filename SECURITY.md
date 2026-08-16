@@ -2,11 +2,23 @@
 
 ## Supported versions
 
-No public version has been released. A supported-version matrix will be added with the first approved release.
+| Version | Supported |
+| --- | --- |
+| 1.x | Yes |
+| Below 1.0 | No |
 
 ## Reporting a vulnerability
 
-A private vulnerability-reporting contact has not yet been designated and is required before the first public release. Until then, do not publish sensitive vulnerability details or credentials in a public issue.
+Send vulnerability reports privately to [support@viewmend.com](mailto:support@viewmend.com) with the subject `Security report: viewmend/sdk`.
+
+Include:
+
+- the affected version;
+- a description of the impact;
+- steps to reproduce the issue;
+- a safe proof of concept, if available.
+
+Do not publish sensitive vulnerability details, credentials, or an undisclosed vulnerability in a public GitHub Issue.
 
 ## Credential handling
 
