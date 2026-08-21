@@ -30,7 +30,7 @@ final class CronApiErrorMapper
                 $requestId,
             ),
             422 => new UnprocessableRegistrationException(
-                'ViewMend rejected the Cron registration.',
+                'ViewMend rejected the Cron schedule.',
                 422,
                 $requestId,
             ),
@@ -49,7 +49,7 @@ final class CronApiErrorMapper
         if ($this->errorCode($response) === 'token_scope_invalid') {
             return new TokenScopeException(
                 'This token is for the Site Tracker API and cannot be used with the Cron API. '
-                    . 'Use the connection token issued in Integrations.',
+                    . 'Use the connection token issued by Cron.',
                 401,
                 $requestId,
             );

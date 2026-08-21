@@ -21,16 +21,12 @@ final readonly class CronClient
         string $cron,
         string $timezone,
         string $endpointPath,
-        string $pluginId,
-        ?string $pluginVersion = null,
         bool $enabled = true,
     ): RegistrationResult {
         return $this->registrations->upsert(
             $cron,
             $timezone,
             $endpointPath,
-            $pluginId,
-            $pluginVersion,
             $enabled,
         );
     }

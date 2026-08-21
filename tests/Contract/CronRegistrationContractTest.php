@@ -24,9 +24,7 @@ final class CronRegistrationContractTest extends TestCase
         $result = $this->sdk($http, $token)->cron()->register(
             cron: '*/15 * * * *',
             timezone: 'Europe/London',
-            endpointPath: '/wp-json/viewmend/v1/cron',
-            pluginId: 'viewmend-wordpress',
-            pluginVersion: '1.2.0',
+            endpointPath: '/cron',
         );
 
         self::assertCount(1, $http->requests);
@@ -46,17 +44,13 @@ final class CronRegistrationContractTest extends TestCase
                 'cron' => '*/15 * * * *',
                 'timezone' => 'Europe/London',
             ],
-            'endpoint_path' => '/wp-json/viewmend/v1/cron',
-            'plugin' => [
-                'id' => 'viewmend-wordpress',
-                'version' => '1.2.0',
-            ],
+            'endpoint_path' => '/cron',
             'enabled' => true,
         ], json_decode((string) $request->getBody(), true, 512, JSON_THROW_ON_ERROR));
 
         self::assertSame('cron_' . str_repeat('c', 26), $result->id);
         self::assertSame('example.com', $result->domain);
-        self::assertSame('https://example.com/wp-json/viewmend/v1/cron', $result->endpointUrl);
+        self::assertSame('https://example.com/cron', $result->endpointUrl);
         self::assertSame('POST', $result->method);
         self::assertSame('pending_verification', $result->status);
         self::assertSame('2026-08-21T09:00:00+00:00', $result->updatedAt?->format(DATE_ATOM));
@@ -131,7 +125,6 @@ final class CronRegistrationContractTest extends TestCase
                 cron: '*/5 * * * *',
                 timezone: 'UTC',
                 endpointPath: '/cron',
-                pluginId: 'example',
             );
             self::fail('Expected registration to be rejected.');
         } catch (UnprocessableRegistrationException $exception) {
@@ -159,7 +152,7 @@ final class CronRegistrationContractTest extends TestCase
             self::assertSame(401, $exception->statusCode);
             self::assertSame(
                 'This token is for the Site Tracker API and cannot be used with the Cron API. '
-                    . 'Use the connection token issued in Integrations.',
+                    . 'Use the connection token issued by Cron.',
                 $exception->getMessage(),
             );
             self::assertStringNotContainsString($serverMessage, $exception->getMessage());
@@ -180,7 +173,7 @@ final class CronRegistrationContractTest extends TestCase
 
     private function successResponse(
         int $status,
-        string $endpointUrl = 'https://example.com/wp-json/viewmend/v1/cron',
+        string $endpointUrl = 'https://example.com/cron',
         string $domain = 'example.com',
     ): Response {
         return new Response($status, ['Content-Type' => 'application/json'], json_encode([
@@ -188,10 +181,9 @@ final class CronRegistrationContractTest extends TestCase
                 'id' => 'cron_' . str_repeat('c', 26),
                 'connection_id' => 'cronconn_' . str_repeat('a', 26),
                 'domain' => $domain,
-                'endpoint_path' => '/wp-json/viewmend/v1/cron',
+                'endpoint_path' => '/cron',
                 'endpoint_url' => $endpointUrl,
                 'method' => 'POST',
-                'plugin' => ['id' => 'viewmend-wordpress', 'version' => '1.2.0'],
                 'schedule' => ['cron' => '*/15 * * * *', 'timezone' => 'Europe/London'],
                 'enabled' => true,
                 'status' => 'pending_verification',

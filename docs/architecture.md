@@ -56,6 +56,8 @@ Cron callback verification intentionally sits outside the outbound HTTP transpor
 
 The supported contract keeps `ViewMend::client(token: ...)` consistent across modules and exposes Cron through `cron()`. Credentials remain module-scoped, and adding Cron does not change the Site Tracker API or its resource path.
 
+Cron registration is application-neutral. `CronClient::register()` sends only the schedule, timezone, callback path, and enabled state. Integration identity and version metadata belong to the consuming application and are neither accepted nor returned by the SDK.
+
 Authentication remains module-scoped even though every module uses the same `token` parameter name. The Cron server rejects the Site Tracker `vmt_` format with `token_scope_invalid`, and the SDK maps only that stable error code to `TokenScopeException`. It never treats the scope response as proof that the supplied Site Tracker token exists.
 
 ## Transport construction
@@ -106,7 +108,7 @@ The initial request counts as attempt one. The default policy permits at most th
 
 No automatic retry occurs for 401, 410, 413, 422, non-network PSR request failures, malformed success responses, or requests not marked retry-safe.
 
-Cron registration operations are idempotent and marked retry-safe. Runtime callbacks are delivered by ViewMend with at-least-once semantics; plugins must deduplicate by the stable callback run ID.
+Cron registration operations are idempotent and marked retry-safe. Runtime callbacks are delivered by ViewMend with at-least-once semantics; clients must deduplicate by the stable callback run ID.
 
 Server response bodies and authorization data are not copied into exception messages or log context. API tokens are redacted from debug and export output.
 

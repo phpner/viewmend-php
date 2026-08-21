@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format follows Keep a Changelog.
 
+## Unreleased
+
+### Changed
+
+- Generalized Cron for any PHP application by removing integration identity and version arguments from `CronClient::register()`.
+- Removed integration metadata from Cron registration requests and `RegistrationResult` responses to match the neutral Cron API contract.
+
 ## 1.1.1 - 2026-08-21
 
 ### Added
@@ -15,14 +22,14 @@ The format follows Keep a Changelog.
 
 ### Added
 
-- Cron registration client for creating, reading, and disabling a plugin-managed schedule.
+- Cron registration client for creating, reading, and disabling a schedule.
 - Signed callback verification with timestamp freshness, connection binding, and verification challenge handling.
 - Typed Cron registration and callback values with contract tests and at-least-once delivery guidance.
 - Dedicated `TokenScopeException` for Site Tracker-formatted tokens rejected by the Cron API without token-existence disclosure.
 
 ### Changed
 
-- Documented settings read-back, plugin form hydration, server-state fields, and offline-cache rules for `current()`.
+- Documented settings read-back, client form hydration, server-state fields, and offline-cache rules for `current()`.
 
 ## 1.0.0 - 2026-08-16
 

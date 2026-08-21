@@ -10,9 +10,9 @@ PHP applications can send deployment events, content updates, cache clears, and 
 
 Learn more about [ViewMend Site Tracker for website change monitoring](https://viewmend.com/site-tracker).
 
-### Cron for plugins
+### Cron
 
-Plugins can register one scheduled HTTPS callback for the domain connected in ViewMend. The plugin chooses the schedule and callback path; ViewMend fixes the method to `POST`, verifies the endpoint, and runs it on a dedicated queue. The plugin never submits an arbitrary callback host.
+Applications can register one scheduled HTTPS callback for the domain connected in ViewMend. The client chooses the schedule and callback path; ViewMend fixes the method to `POST`, verifies the endpoint, and runs it on a dedicated queue. The client never submits an arbitrary callback host.
 
 ## Installation
 
@@ -92,7 +92,7 @@ Use an event ID that is unique and stable for the originating change. Safe retri
 
 ## Register Cron
 
-First create a connection for the site's domain in ViewMend and copy the one-time connection token into the plugin settings. The plugin then registers its callback path and the user's schedule:
+First create a connection for the site's domain in ViewMend and copy the one-time connection token into the application settings. The application then registers its callback path and schedule:
 
 ```php
 use ViewMend\ViewMend;
@@ -103,17 +103,15 @@ $cron = $viewmend->cron();
 $registration = $cron->register(
     cron: '*/15 * * * *',
     timezone: 'Europe/London',
-    endpointPath: '/wp-json/viewmend/v1/cron',
-    pluginId: 'viewmend-wordpress',
-    pluginVersion: '1.2.0',
+    endpointPath: '/cron',
 );
 ```
 
-The registration request sends only an endpoint path. ViewMend combines that path with the connected domain and always calls it using HTTPS `POST`. The returned `RegistrationResult` contains the saved settings and current server state, so the plugin can update its form immediately. Registering a new or changed path starts endpoint verification before normal runs begin.
+The registration request sends only an endpoint path. ViewMend combines that path with the connected domain and always calls it using HTTPS `POST`. The returned `RegistrationResult` contains the saved settings and current server state, so the application can update its form immediately. Registering a new or changed path starts endpoint verification before normal runs begin.
 
 ### Load saved Cron settings
 
-When the plugin settings screen opens, use the saved token to load the authoritative settings from ViewMend:
+When the application settings screen opens, use the saved token to load the authoritative settings from ViewMend:
 
 ```php
 use ViewMend\Exception\AuthenticationException;
@@ -148,7 +146,7 @@ try {
 }
 ```
 
-`current()` calls `GET /api/v1/cron/registration` and returns `null` only when no registration exists. ViewMend is the source of truth. A plugin may keep the last successful response for temporary offline display, but it must not let that cache overwrite a later server response, and it must never cache or log the connection token as part of the settings snapshot. Catch `TokenScopeException` before `AuthenticationException` because it is the more specific authentication failure.
+`current()` calls `GET /api/v1/cron/registration` and returns `null` only when no registration exists. ViewMend is the source of truth. A client may keep the last successful response for temporary offline display, but it must not let that cache overwrite a later server response, and it must never cache or log the connection token as part of the settings snapshot. Catch `TokenScopeException` before `AuthenticationException` because it is the more specific authentication failure.
 
 `disable()` pauses the saved schedule. See the complete [settings synchronization contract](docs/cron.md#loading-saved-settings).
 
@@ -161,12 +159,12 @@ if ($callback->isVerification()) {
     $responseBody = $callback->verificationResponseBody();
     // Return $responseBody as application/json with a 2xx status.
 } else {
-    // Deduplicate by $callback->runId, then run the plugin task.
+    // Deduplicate by $callback->runId, then run the scheduled task.
     // Return any 2xx response when processing succeeds.
 }
 ```
 
-Cron delivery is at least once: a transient failure can cause the same `runId` to be delivered again with a higher `attempt`. Store completed run IDs before repeating side effects. See the complete [Cron integration contract for plugins](docs/cron.md).
+Cron delivery is at least once: a transient failure can cause the same `runId` to be delivered again with a higher `attempt`. Store completed run IDs before repeating side effects. See the complete [Cron integration contract](docs/cron.md).
 
 ## Handle the result
 

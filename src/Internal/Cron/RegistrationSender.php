@@ -29,16 +29,12 @@ final readonly class RegistrationSender
         string $cron,
         string $timezone,
         string $endpointPath,
-        string $pluginId,
-        ?string $pluginVersion,
         bool $enabled,
     ): RegistrationResult {
         $payload = $this->registrationPayload(
             $cron,
             $timezone,
             $endpointPath,
-            $pluginId,
-            $pluginVersion,
             $enabled,
         );
 
@@ -105,15 +101,11 @@ final readonly class RegistrationSender
         string $cron,
         string $timezone,
         string $endpointPath,
-        string $pluginId,
-        ?string $pluginVersion,
         bool $enabled,
     ): array {
         $cron = trim($cron);
         $timezone = trim($timezone);
         $endpointPath = trim($endpointPath);
-        $pluginId = trim($pluginId);
-        $pluginVersion = $pluginVersion === null ? null : trim($pluginVersion);
 
         if ($cron === '' || strlen($cron) > 100) {
             throw new ValidationException('The Cron expression is invalid.');
@@ -136,28 +128,12 @@ final readonly class RegistrationSender
             throw new ValidationException('The Cron endpoint must be an absolute path without a host or query.');
         }
 
-        if (preg_match('/^[A-Za-z0-9][A-Za-z0-9._-]{0,119}$/D', $pluginId) !== 1) {
-            throw new ValidationException('The Cron plugin ID is invalid.');
-        }
-
-        if ($pluginVersion === '') {
-            $pluginVersion = null;
-        }
-
-        if ($pluginVersion !== null && strlen($pluginVersion) > 80) {
-            throw new ValidationException('The Cron plugin version is invalid.');
-        }
-
         return [
             'schedule' => [
                 'cron' => $cron,
                 'timezone' => $timezone,
             ],
             'endpoint_path' => $endpointPath,
-            'plugin' => [
-                'id' => $pluginId,
-                'version' => $pluginVersion,
-            ],
             'enabled' => $enabled,
         ];
     }
@@ -179,12 +155,8 @@ final readonly class RegistrationSender
             throw $this->malformed($response);
         }
 
-        $plugin = $data['plugin'] ?? null;
         $schedule = $data['schedule'] ?? null;
-        if (
-            ! is_array($plugin) || array_is_list($plugin)
-            || ! is_array($schedule) || array_is_list($schedule)
-        ) {
+        if (! is_array($schedule) || array_is_list($schedule)) {
             throw $this->malformed($response);
         }
 
@@ -218,8 +190,6 @@ final readonly class RegistrationSender
             endpointPath: $this->string($data, 'endpoint_path', $response),
             endpointUrl: $endpointUrl,
             method: $method,
-            pluginId: $this->string($plugin, 'id', $response),
-            pluginVersion: $this->nullableString($plugin, 'version', $response),
             cron: $this->string($schedule, 'cron', $response),
             timezone: $this->string($schedule, 'timezone', $response),
             enabled: $enabled,

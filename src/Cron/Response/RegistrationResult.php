@@ -15,8 +15,6 @@ final readonly class RegistrationResult
         public string $endpointPath,
         public string $endpointUrl,
         public string $method,
-        public string $pluginId,
-        public ?string $pluginVersion,
         public string $cron,
         public string $timezone,
         public bool $enabled,
