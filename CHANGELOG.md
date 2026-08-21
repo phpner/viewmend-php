@@ -4,19 +4,17 @@ All notable changes to this project will be documented in this file.
 
 The format follows Keep a Changelog.
 
-## Unreleased
-
-### Changed
-
-- Generalized Cron for any PHP application by removing integration identity and version arguments from `CronClient::register()`.
-- Removed integration metadata from Cron registration requests and `RegistrationResult` responses to match the neutral Cron API contract.
-
-## 1.1.1 - 2026-08-21
+## 1.2.0 - 2026-08-21
 
 ### Added
 
 - Optional API base URL argument on `ViewMend::client()` for self-hosted and local ViewMend installations.
 - HTTP callback support limited to loopback hosts and `host.docker.internal` for local development.
+
+### Changed
+
+- Generalized Cron for any PHP application by removing integration identity and version arguments from `CronClient::register()`.
+- Removed integration metadata from Cron registration requests and `RegistrationResult` responses to match the neutral Cron API contract.
 
 ## 1.1.0 - 2026-08-21
 
