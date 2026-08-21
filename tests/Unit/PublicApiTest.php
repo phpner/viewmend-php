@@ -32,7 +32,7 @@ final class PublicApiTest extends TestCase
 
     public function testCronModuleCanBeSelectedWithoutNetworkSideEffects(): void
     {
-        $token = 'vmcron1_pcn_' . str_repeat('a', 26) . '_' . str_repeat('A', 64) . '_' . str_repeat('S', 64);
+        $token = 'vmcron1_cronconn_' . str_repeat('a', 26) . '_' . str_repeat('A', 64) . '_' . str_repeat('S', 64);
         $viewmend = ViewMend::client(token: $token);
 
         self::assertInstanceOf(CronClient::class, $viewmend->cron());

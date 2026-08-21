@@ -21,7 +21,7 @@ final class CronCallbackVerifierTest extends TestCase
         $body = json_encode([
             'type' => Callback::TYPE_RUN,
             'run_id' => 'run_' . str_repeat('b', 26),
-            'connection_id' => 'pcn_' . str_repeat('a', 26),
+            'connection_id' => 'cronconn_' . str_repeat('a', 26),
             'job_id' => 'cron_' . str_repeat('c', 26),
             'scheduled_at' => '2026-08-21T09:00:00+00:00',
             'attempt' => 1,
@@ -114,7 +114,7 @@ final class CronCallbackVerifierTest extends TestCase
         $payload = [
             'type' => $type,
             'run_id' => 'run_' . str_repeat('b', 26),
-            'connection_id' => 'pcn_' . str_repeat('a', 26),
+            'connection_id' => 'cronconn_' . str_repeat('a', 26),
             'job_id' => 'cron_' . str_repeat('c', 26),
             'scheduled_at' => '2026-08-21T09:00:00+00:00',
             'attempt' => 1,
@@ -149,6 +149,6 @@ final class CronCallbackVerifierTest extends TestCase
 
     private function token(): string
     {
-        return 'vmcron1_pcn_' . str_repeat('a', 26) . '_' . str_repeat('A', 64) . '_' . str_repeat('S', 64);
+        return 'vmcron1_cronconn_' . str_repeat('a', 26) . '_' . str_repeat('A', 64) . '_' . str_repeat('S', 64);
     }
 }

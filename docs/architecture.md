@@ -54,7 +54,7 @@ Core transport, configuration, validation, and retry behavior know nothing about
 
 Cron callback verification intentionally sits outside the outbound HTTP transport. It derives the signing secret from the same token passed to `ViewMend::client()`, validates the timestamp and HMAC over the exact raw body, binds the header request ID to the payload run ID, and returns a typed callback. It performs no network I/O.
 
-The unreleased `pluginCron()` and `connectionKey` draft names were rejected because they exposed an unnecessary plugin-specific client concept. The supported contract keeps `ViewMend::client(token: ...)` unchanged and exposes the isolated module through `cron()`. This decision does not change the Site Tracker API or its resource path.
+The supported contract keeps `ViewMend::client(token: ...)` consistent across modules and exposes Cron through `cron()`. Credentials remain module-scoped, and adding Cron does not change the Site Tracker API or its resource path.
 
 Authentication remains module-scoped even though every module uses the same `token` parameter name. The Cron server rejects the Site Tracker `vmt_` format with `token_scope_invalid`, and the SDK maps only that stable error code to `TokenScopeException`. It never treats the scope response as proof that the supplied Site Tracker token exists.
 

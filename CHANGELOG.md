@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format follows Keep a Changelog.
 
-## Unreleased
+## 1.1.0 - 2026-08-21
 
 ### Added
 
@@ -15,7 +15,6 @@ The format follows Keep a Changelog.
 
 ### Changed
 
-- Replaced the unreleased `pluginCron()`/`connectionKey` draft terminology with `cron()` and the existing `token` authentication term. Site Tracker APIs are unchanged.
 - Documented settings read-back, plugin form hydration, server-state fields, and offline-cache rules for `current()`.
 
 ## 1.0.0 - 2026-08-16

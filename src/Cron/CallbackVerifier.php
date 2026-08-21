@@ -25,7 +25,7 @@ final readonly class CallbackVerifier
         ?DateTimeImmutable $now = null,
     ): self {
         $matched = preg_match(
-            '/^vmcron1_(pcn_[0-9a-z]{26})_([A-Za-z0-9]{64})_([A-Za-z0-9]{64})$/D',
+            '/^vmcron1_(cronconn_[0-9a-z]{26})_([A-Za-z0-9]{64})_([A-Za-z0-9]{64})$/D',
             $token,
             $matches,
         );

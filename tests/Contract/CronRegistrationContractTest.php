@@ -141,7 +141,7 @@ final class CronRegistrationContractTest extends TestCase
         return new Response($status, ['Content-Type' => 'application/json'], json_encode([
             'data' => [
                 'id' => 'cron_' . str_repeat('c', 26),
-                'connection_id' => 'pcn_' . str_repeat('a', 26),
+                'connection_id' => 'cronconn_' . str_repeat('a', 26),
                 'domain' => 'example.com',
                 'endpoint_path' => '/wp-json/viewmend/v1/cron',
                 'endpoint_url' => 'https://example.com/wp-json/viewmend/v1/cron',
@@ -161,6 +161,6 @@ final class CronRegistrationContractTest extends TestCase
 
     private function token(): string
     {
-        return 'vmcron1_pcn_' . str_repeat('a', 26) . '_' . str_repeat('A', 64) . '_' . str_repeat('S', 64);
+        return 'vmcron1_cronconn_' . str_repeat('a', 26) . '_' . str_repeat('A', 64) . '_' . str_repeat('S', 64);
     }
 }
