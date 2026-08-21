@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace ViewMend\PluginCron;
+namespace ViewMend\Cron;
 
 use DateTimeImmutable;
 use Exception;
@@ -20,18 +20,18 @@ final readonly class CallbackVerifier
     ) {
     }
 
-    public static function fromConnectionKey(
-        #[\SensitiveParameter] string $connectionKey,
+    public static function fromToken(
+        #[\SensitiveParameter] string $token,
         ?DateTimeImmutable $now = null,
     ): self {
         $matched = preg_match(
             '/^vmcron1_(pcn_[0-9a-z]{26})_([A-Za-z0-9]{64})_([A-Za-z0-9]{64})$/D',
-            $connectionKey,
+            $token,
             $matches,
         );
 
         if ($matched !== 1) {
-            throw new CallbackVerificationException('The Plugin Cron connection key is invalid.');
+            throw new CallbackVerificationException('The Cron connection token is invalid.');
         }
 
         return new self($matches[1], $matches[3], $now);
@@ -57,7 +57,7 @@ final readonly class CallbackVerifier
         $age = abs($this->currentTimestamp() - (int) $timestamp);
         if ($age > self::MAX_AGE_SECONDS) {
             throw new CallbackVerificationException(
-                'The Plugin Cron callback timestamp is outside the allowed window.',
+                'The Cron callback timestamp is outside the allowed window.',
             );
         }
 
@@ -172,7 +172,7 @@ final readonly class CallbackVerifier
 
     private function invalid(): CallbackVerificationException
     {
-        return new CallbackVerificationException('The Plugin Cron callback could not be verified.');
+        return new CallbackVerificationException('The Cron callback could not be verified.');
     }
 
     /** @return array{connectionId: string, signingSecret: string} */

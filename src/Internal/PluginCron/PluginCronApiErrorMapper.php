@@ -22,17 +22,17 @@ final class PluginCronApiErrorMapper
 
         return match ($response->statusCode) {
             401 => new AuthenticationException(
-                'ViewMend rejected the Plugin Cron connection key.',
+                'ViewMend rejected the Cron connection token.',
                 401,
                 $requestId,
             ),
             410 => new EndpointDisabledException(
-                'The ViewMend Plugin Cron connection is disabled.',
+                'The ViewMend Cron connection is disabled.',
                 410,
                 $requestId,
             ),
             422 => new UnprocessableRegistrationException(
-                'ViewMend rejected the Plugin Cron registration.',
+                'ViewMend rejected the Cron registration.',
                 422,
                 $requestId,
             ),
@@ -50,14 +50,14 @@ final class PluginCronApiErrorMapper
     {
         if ($response->statusCode >= 500) {
             return new ServerException(
-                'ViewMend could not process the Plugin Cron request.',
+                'ViewMend could not process the Cron request.',
                 $response->statusCode,
                 $requestId,
             );
         }
 
         return new UnexpectedResponseException(
-            'ViewMend returned an unexpected Plugin Cron HTTP status.',
+            'ViewMend returned an unexpected Cron HTTP status.',
             $response->statusCode,
             $requestId,
         );

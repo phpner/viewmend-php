@@ -15,11 +15,11 @@ use ViewMend\ViewMend;
 final class PluginCronRegistrationContractTest extends TestCase
 {
     /** @throws JsonException */
-    public function testRegistersExactPluginCronContractAndParsesResponse(): void
+    public function testRegistersExactCronContractAndParsesResponse(): void
     {
         $http = new SequenceHttpClient([$this->successResponse(201)]);
-        $key = $this->connectionKey();
-        $result = $this->sdk($http, $key)->pluginCron()->register(
+        $token = $this->token();
+        $result = $this->sdk($http, $token)->cron()->register(
             cron: '*/15 * * * *',
             timezone: 'Europe/London',
             endpointPath: '/wp-json/viewmend/v1/cron',
@@ -31,12 +31,12 @@ final class PluginCronRegistrationContractTest extends TestCase
         $request = $http->requests[0];
         self::assertSame('PUT', $request->getMethod());
         self::assertSame(
-            'https://viewmend.com/api/v1/plugin-cron/registration',
+            'https://viewmend.com/api/v1/cron/registration',
             (string) $request->getUri(),
         );
         self::assertSame('application/json', $request->getHeaderLine('Content-Type'));
         self::assertSame(
-            hash('sha256', 'Bearer ' . $key),
+            hash('sha256', 'Bearer ' . $token),
             hash('sha256', $request->getHeaderLine('Authorization')),
         );
         self::assertSame([
@@ -66,7 +66,7 @@ final class PluginCronRegistrationContractTest extends TestCase
             new Response(404, ['Content-Type' => 'application/json'], '{"error":{"code":"registration_not_found"}}'),
             new Response(204),
         ]);
-        $client = $this->sdk($http, $this->connectionKey())->pluginCron();
+        $client = $this->sdk($http, $this->token())->cron();
 
         self::assertNull($client->current());
         $client->disable();
@@ -84,7 +84,7 @@ final class PluginCronRegistrationContractTest extends TestCase
         ]);
 
         try {
-            $this->sdk($http, $this->connectionKey())->pluginCron()->register(
+            $this->sdk($http, $this->token())->cron()->register(
                 cron: '*/5 * * * *',
                 timezone: 'UTC',
                 endpointPath: '/cron',
@@ -97,12 +97,12 @@ final class PluginCronRegistrationContractTest extends TestCase
         }
     }
 
-    private function sdk(SequenceHttpClient $http, string $key): ViewMend
+    private function sdk(SequenceHttpClient $http, string $token): ViewMend
     {
         $factory = new Psr17Factory();
 
         return ViewMend::withPsr18(
-            token: $key,
+            token: $token,
             httpClient: $http,
             requestFactory: $factory,
             streamFactory: $factory,
@@ -132,7 +132,7 @@ final class PluginCronRegistrationContractTest extends TestCase
         ], JSON_THROW_ON_ERROR));
     }
 
-    private function connectionKey(): string
+    private function token(): string
     {
         return 'vmcron1_pcn_' . str_repeat('a', 26) . '_' . str_repeat('A', 64) . '_' . str_repeat('S', 64);
     }

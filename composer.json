@@ -1,6 +1,6 @@
 {
     "name": "viewmend/sdk",
-    "description": "Official framework-agnostic PHP SDK for ViewMend APIs, including Site Tracker events and Plugin Cron.",
+    "description": "Official framework-agnostic PHP SDK for ViewMend APIs, including Site Tracker events and Cron for plugins.",
     "homepage": "https://viewmend.com/",
     "license": "MIT",
     "type": "library",

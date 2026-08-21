@@ -8,11 +8,37 @@ use DateTimeImmutable;
 use JsonException;
 use PHPUnit\Framework\TestCase;
 use ViewMend\Exception\CallbackVerificationException;
-use ViewMend\PluginCron\Callback;
-use ViewMend\PluginCron\CallbackVerifier;
+use ViewMend\Cron\Callback;
+use ViewMend\Cron\CallbackVerifier;
+use ViewMend\ViewMend;
 
 final class PluginCronCallbackVerifierTest extends TestCase
 {
+    /** @throws JsonException */
+    public function testCronClientVerifiesCallbackWithTheSameToken(): void
+    {
+        $timestamp = (string) time();
+        $body = json_encode([
+            'type' => Callback::TYPE_RUN,
+            'run_id' => 'run_' . str_repeat('b', 26),
+            'connection_id' => 'pcn_' . str_repeat('a', 26),
+            'job_id' => 'cron_' . str_repeat('c', 26),
+            'scheduled_at' => '2026-08-21T09:00:00+00:00',
+            'attempt' => 1,
+        ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES);
+
+        $callback = ViewMend::client(token: $this->token())
+            ->cron()
+            ->verifyCallback([
+                'X-ViewMend-Request-Id' => 'run_' . str_repeat('b', 26),
+                'X-ViewMend-Timestamp' => $timestamp,
+                'X-ViewMend-Signature' => $this->signature($timestamp, $body),
+            ], $body);
+
+        self::assertTrue($callback->isRun());
+        self::assertSame('cron_' . str_repeat('c', 26), $callback->jobId);
+    }
+
     /** @throws JsonException */
     public function testVerifiesSignedCallbackAndBuildsChallengeResponse(): void
     {
@@ -102,8 +128,8 @@ final class PluginCronCallbackVerifierTest extends TestCase
         $secret = str_repeat('S', 64);
 
         return [
-            CallbackVerifier::fromConnectionKey(
-                $this->connectionKey(),
+            CallbackVerifier::fromToken(
+                $this->token(),
                 new DateTimeImmutable('2026-08-21T09:00:00+00:00'),
             ),
             [
@@ -121,7 +147,7 @@ final class PluginCronCallbackVerifierTest extends TestCase
         return 'v1=' . hash_hmac('sha256', $timestamp . '.' . $body, str_repeat('S', 64));
     }
 
-    private function connectionKey(): string
+    private function token(): string
     {
         return 'vmcron1_pcn_' . str_repeat('a', 26) . '_' . str_repeat('A', 64) . '_' . str_repeat('S', 64);
     }

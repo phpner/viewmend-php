@@ -12,7 +12,7 @@ Every PHP file uses strict types. The source tree uses PSR-4 and PSR-12.
 
 ## Product scope
 
-The repository is the general ViewMend SDK. Site Tracker Events and Plugin Cron are isolated product modules built on the same transport. Additional modules may be added only for documented API contracts.
+The repository is the general ViewMend SDK. Site Tracker Events and Cron are isolated product modules built on the same transport. Additional modules may be added only for documented API contracts.
 
 Laravel integration will live in `viewmend/laravel` and depend on this package. Laravel and WordPress code are outside this repository.
 
@@ -23,9 +23,9 @@ The supported public surface is intentionally small:
 - `ViewMend\ViewMend`: default client factory, advanced PSR factory, and module access.
 - `ViewMend\SiteTracker\SiteTrackerClient`, `Events`, and `PendingEvent`: fluent Site Tracker event construction.
 - `ViewMend\SiteTracker\Response\*`: typed delivery IDs, result, and forward-compatible queue status.
-- `ViewMend\PluginCron\PluginCronClient`: schedule registration, inspection, and disabling.
-- `ViewMend\PluginCron\CallbackVerifier` and `Callback`: signed callback verification and typed delivery data.
-- `ViewMend\PluginCron\Response\RegistrationResult`: typed server registration state.
+- `ViewMend\Cron\CronClient`: schedule registration, inspection, disabling, and callback verification.
+- `ViewMend\Cron\CallbackVerifier` and `Callback`: signed callback verification and typed delivery data.
+- `ViewMend\Cron\Response\RegistrationResult`: typed server registration state.
 - `ViewMend\Exception\*`: stable configuration, validation, transport, and API failures.
 - PSR-18, PSR-17, and PSR-3 interfaces used by the advanced factory.
 
@@ -39,7 +39,7 @@ Classes below `ViewMend\Internal` are implementation details and are not compati
 flowchart LR
     App["Consumer application"] --> Entry["ViewMend"]
     Entry --> Tracker["SiteTracker fluent API"]
-    Entry --> Cron["Plugin Cron API"]
+    Entry --> Cron["Cron API"]
     Tracker --> Sender["Internal EventSender"]
     Cron --> Registration["Internal RegistrationSender"]
     Sender --> Contract["Internal TransportInterface"]
@@ -52,7 +52,9 @@ flowchart LR
 
 Core transport, configuration, validation, and retry behavior know nothing about Site Tracker. The Site Tracker integration ID is validated only at `siteTracker($integrationId)`; creating the general ViewMend client requires only credentials and transport configuration.
 
-Plugin Cron callback verification intentionally sits outside the outbound HTTP transport. It derives the signing secret from the connection key, validates the timestamp and HMAC over the exact raw body, binds the header request ID to the payload run ID, and returns a typed callback. It performs no network I/O.
+Cron callback verification intentionally sits outside the outbound HTTP transport. It derives the signing secret from the same token passed to `ViewMend::client()`, validates the timestamp and HMAC over the exact raw body, binds the header request ID to the payload run ID, and returns a typed callback. It performs no network I/O.
+
+The unreleased `pluginCron()` and `connectionKey` draft names were rejected because they exposed an unnecessary plugin-specific client concept. The supported contract keeps `ViewMend::client(token: ...)` unchanged and exposes the isolated module through `cron()`. This decision does not change the Site Tracker API or its resource path.
 
 ## Transport construction
 
@@ -78,9 +80,9 @@ The resulting production endpoint is:
 
 `https://viewmend.com/api/v1/site-tracker/integrations/{integration}/events`
 
-The Plugin Cron module owns one relative resource path:
+The Cron module owns one relative resource path:
 
-`/plugin-cron/registration`
+`/cron/registration`
 
 An `apiBaseUrl` override is available for tests, self-hosted installations, and advanced configuration. The version prefix belongs in `apiBaseUrl`; modules must not duplicate `/api/v1`.
 
@@ -102,7 +104,7 @@ The initial request counts as attempt one. The default policy permits at most th
 
 No automatic retry occurs for 401, 410, 413, 422, non-network PSR request failures, malformed success responses, or requests not marked retry-safe.
 
-Plugin Cron registration operations are idempotent and marked retry-safe. Runtime callbacks are delivered by ViewMend with at-least-once semantics; plugins must deduplicate by the stable callback run ID.
+Cron registration operations are idempotent and marked retry-safe. Runtime callbacks are delivered by ViewMend with at-least-once semantics; plugins must deduplicate by the stable callback run ID.
 
 Server response bodies and authorization data are not copied into exception messages or log context. API tokens are redacted from debug and export output.
 

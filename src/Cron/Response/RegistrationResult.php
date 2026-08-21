@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace ViewMend\PluginCron\Response;
+namespace ViewMend\Cron\Response;
 
 use DateTimeImmutable;
 

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace ViewMend\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
-use ViewMend\PluginCron\PluginCronClient;
+use ViewMend\Cron\CronClient;
 use ViewMend\SiteTracker\PendingEvent;
 use ViewMend\ViewMend;
 
@@ -30,12 +30,13 @@ final class PublicApiTest extends TestCase
         self::assertSame('https://viewmend.com/api/v1', ViewMend::PRODUCTION_API_BASE_URL);
     }
 
-    public function testPluginCronModuleCanBeSelectedWithoutNetworkSideEffects(): void
+    public function testCronModuleCanBeSelectedWithoutNetworkSideEffects(): void
     {
-        $viewmend = ViewMend::client(
-            token: 'vmcron1_pcn_' . str_repeat('a', 26) . '_' . str_repeat('A', 64) . '_' . str_repeat('S', 64),
-        );
+        $token = 'vmcron1_pcn_' . str_repeat('a', 26) . '_' . str_repeat('A', 64) . '_' . str_repeat('S', 64);
+        $viewmend = ViewMend::client(token: $token);
 
-        self::assertInstanceOf(PluginCronClient::class, $viewmend->pluginCron());
+        self::assertInstanceOf(CronClient::class, $viewmend->cron());
+        self::assertStringNotContainsString($token, print_r($viewmend, true));
+        self::assertStringContainsString('[REDACTED]', print_r($viewmend, true));
     }
 }

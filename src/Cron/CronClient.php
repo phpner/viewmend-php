@@ -2,16 +2,18 @@
 
 declare(strict_types=1);
 
-namespace ViewMend\PluginCron;
+namespace ViewMend\Cron;
 
+use ViewMend\Cron\Response\RegistrationResult;
 use ViewMend\Internal\PluginCron\RegistrationSender;
-use ViewMend\PluginCron\Response\RegistrationResult;
 
-final readonly class PluginCronClient
+final readonly class CronClient
 {
     /** @internal */
-    public function __construct(private RegistrationSender $registrations)
-    {
+    public function __construct(
+        private RegistrationSender $registrations,
+        private CallbackVerifier $callbacks,
+    ) {
     }
 
     public function register(
@@ -40,5 +42,13 @@ final readonly class PluginCronClient
     public function disable(): void
     {
         $this->registrations->disable();
+    }
+
+    /**
+     * @param array<string, string|list<string>> $headers
+     */
+    public function verifyCallback(array $headers, string $rawBody): Callback
+    {
+        return $this->callbacks->verify($headers, $rawBody);
     }
 }

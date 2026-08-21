@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace ViewMend\PluginCron;
+namespace ViewMend\Cron;
 
 use JsonException;
 use ViewMend\Exception\CallbackVerificationException;
 
 final readonly class Callback
 {
-    public const TYPE_VERIFICATION = 'plugin_cron.verification';
+    public const TYPE_VERIFICATION = 'cron.verification';
 
-    public const TYPE_RUN = 'plugin_cron.run';
+    public const TYPE_RUN = 'cron.run';
 
     public function __construct(
         public string $type,

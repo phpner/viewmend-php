@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace ViewMend;
 
 use GuzzleHttp\Psr7\HttpFactory;
+use LogicException;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use ViewMend\Internal\Config\ClientConfig;
+use ViewMend\Internal\Config\ApiToken;
 use ViewMend\Internal\Contracts\Http\TransportInterface;
 use ViewMend\Internal\Http\DefaultGuzzleClientFactory;
 use ViewMend\Internal\Http\Psr18Transport;
@@ -22,14 +24,17 @@ use ViewMend\Internal\Retry\SystemClock;
 use ViewMend\Internal\SiteTracker\EventSender;
 use ViewMend\Internal\SiteTracker\IntegrationId;
 use ViewMend\SiteTracker\SiteTrackerClient;
-use ViewMend\PluginCron\PluginCronClient;
+use ViewMend\Cron\CallbackVerifier;
+use ViewMend\Cron\CronClient;
 
 final readonly class ViewMend
 {
     public const PRODUCTION_API_BASE_URL = 'https://viewmend.com/api/v1';
 
-    private function __construct(private TransportInterface $transport)
-    {
+    private function __construct(
+        private TransportInterface $transport,
+        private ?ApiToken $token = null,
+    ) {
     }
 
     public static function client(#[\SensitiveParameter] string $token): self
@@ -61,7 +66,7 @@ final readonly class ViewMend
             $logger,
         );
 
-        return new self($transport);
+        return new self($transport, $config->apiToken);
     }
 
     /** @internal */
@@ -78,8 +83,15 @@ final readonly class ViewMend
         ));
     }
 
-    public function pluginCron(): PluginCronClient
+    public function cron(): CronClient
     {
-        return new PluginCronClient(new RegistrationSender($this->transport));
+        if ($this->token === null) {
+            throw new LogicException('Cron requires a token-backed ViewMend client.');
+        }
+
+        return new CronClient(
+            new RegistrationSender($this->transport),
+            CallbackVerifier::fromToken($this->token->reveal()),
+        );
     }
 }

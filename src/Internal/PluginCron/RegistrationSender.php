@@ -12,12 +12,12 @@ use ViewMend\Exception\ValidationException;
 use ViewMend\Internal\Contracts\Http\TransportInterface;
 use ViewMend\Internal\Http\HttpRequest;
 use ViewMend\Internal\Http\HttpResponse;
-use ViewMend\PluginCron\Response\RegistrationResult;
+use ViewMend\Cron\Response\RegistrationResult;
 
 /** @internal */
 final readonly class RegistrationSender
 {
-    private const PATH = '/plugin-cron/registration';
+    private const PATH = '/cron/registration';
 
     public function __construct(
         private TransportInterface $transport,
@@ -45,7 +45,7 @@ final readonly class RegistrationSender
         try {
             $body = json_encode($payload, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES);
         } catch (JsonException) {
-            throw new ValidationException('The Plugin Cron registration could not be encoded as JSON.');
+            throw new ValidationException('The Cron registration could not be encoded as JSON.');
         }
 
         $response = $this->transport->send(new HttpRequest(
@@ -116,11 +116,11 @@ final readonly class RegistrationSender
         $pluginVersion = $pluginVersion === null ? null : trim($pluginVersion);
 
         if ($cron === '' || strlen($cron) > 100) {
-            throw new ValidationException('The Plugin Cron expression is invalid.');
+            throw new ValidationException('The Cron expression is invalid.');
         }
 
         if ($timezone === '' || strlen($timezone) > 64) {
-            throw new ValidationException('The Plugin Cron timezone is invalid.');
+            throw new ValidationException('The Cron timezone is invalid.');
         }
 
         if (
@@ -133,11 +133,11 @@ final readonly class RegistrationSender
             || str_contains($endpointPath, '#')
             || preg_match('#(^|/)\.\.(/|$)#', $endpointPath) === 1
         ) {
-            throw new ValidationException('The Plugin Cron endpoint must be an absolute path without a host or query.');
+            throw new ValidationException('The Cron endpoint must be an absolute path without a host or query.');
         }
 
         if (preg_match('/^[A-Za-z0-9][A-Za-z0-9._-]{0,119}$/D', $pluginId) !== 1) {
-            throw new ValidationException('The Plugin Cron plugin ID is invalid.');
+            throw new ValidationException('The Cron plugin ID is invalid.');
         }
 
         if ($pluginVersion === '') {
@@ -145,7 +145,7 @@ final readonly class RegistrationSender
         }
 
         if ($pluginVersion !== null && strlen($pluginVersion) > 80) {
-            throw new ValidationException('The Plugin Cron plugin version is invalid.');
+            throw new ValidationException('The Cron plugin version is invalid.');
         }
 
         return [
@@ -269,7 +269,7 @@ final readonly class RegistrationSender
     private function malformed(HttpResponse $response): UnexpectedResponseException
     {
         return new UnexpectedResponseException(
-            'ViewMend returned a malformed Plugin Cron response.',
+            'ViewMend returned a malformed Cron response.',
             $response->statusCode,
             $response->headerLine('X-Request-Id'),
         );

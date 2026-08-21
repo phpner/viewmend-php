@@ -10,7 +10,7 @@ PHP applications can send deployment events, content updates, cache clears, and 
 
 Learn more about [ViewMend Site Tracker for website change monitoring](https://viewmend.com/site-tracker).
 
-### Plugin Cron
+### Cron for plugins
 
 Plugins can register one scheduled HTTPS callback for the domain connected in ViewMend. The plugin chooses the schedule and callback path; ViewMend fixes the method to `POST`, verifies the endpoint, and runs it on a dedicated queue. The plugin never submits an arbitrary callback host.
 
@@ -90,16 +90,17 @@ For optional integration-declared `changed_fields` and `metadata`, see [Site Tra
 
 Use an event ID that is unique and stable for the originating change. Safe retries send the identical serialized payload and the same event ID. If the server already accepted that ID, it returns a duplicate delivery instead of creating a second event.
 
-## Register Plugin Cron
+## Register Cron
 
-First create a connection for the site's domain in ViewMend and copy the one-time connection key into the plugin settings. The plugin then registers its callback path and the user's schedule:
+First create a connection for the site's domain in ViewMend and copy the one-time connection token into the plugin settings. The plugin then registers its callback path and the user's schedule:
 
 ```php
 use ViewMend\ViewMend;
 
-$viewmend = ViewMend::client(token: $connectionKey);
+$viewmend = ViewMend::client(token: $token);
+$cron = $viewmend->cron();
 
-$registration = $viewmend->pluginCron()->register(
+$registration = $cron->register(
     cron: '*/15 * * * *',
     timezone: 'Europe/London',
     endpointPath: '/wp-json/viewmend/v1/cron',
@@ -113,10 +114,7 @@ The registration request sends only an endpoint path. ViewMend combines that pat
 The callback must verify the signature against the exact raw request body before processing it:
 
 ```php
-use ViewMend\PluginCron\CallbackVerifier;
-
-$callback = CallbackVerifier::fromConnectionKey($connectionKey)
-    ->verify($requestHeaders, $rawRequestBody);
+$callback = $cron->verifyCallback($requestHeaders, $rawRequestBody);
 
 if ($callback->isVerification()) {
     $responseBody = $callback->verificationResponseBody();
@@ -127,7 +125,7 @@ if ($callback->isVerification()) {
 }
 ```
 
-Plugin Cron delivery is at least once: a transient failure can cause the same `runId` to be delivered again with a higher `attempt`. Store completed run IDs before repeating side effects. See the complete [Plugin Cron integration contract](docs/plugin-cron.md).
+Cron delivery is at least once: a transient failure can cause the same `runId` to be delivered again with a higher `attempt`. Store completed run IDs before repeating side effects. See the complete [Cron integration contract for plugins](docs/plugin-cron.md).
 
 ## Handle the result
 
@@ -151,8 +149,8 @@ All SDK failures extend `ViewMend\Exception\ViewMendException`. Significant API 
 - `EndpointDisabledException` for 410
 - `PayloadTooLargeException` for 413
 - `UnprocessableEventException` for 422
-- `UnprocessableRegistrationException` for invalid Plugin Cron registration
-- `CallbackVerificationException` for an invalid or stale Plugin Cron callback
+- `UnprocessableRegistrationException` for invalid Cron registration
+- `CallbackVerificationException` for an invalid or stale Cron callback
 - `RateLimitException` for exhausted 429 responses
 - `ServerException` for exhausted 5xx responses
 - `NetworkException` for exhausted PSR-18 network failures
