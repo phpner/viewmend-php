@@ -39,4 +39,14 @@ final class PublicApiTest extends TestCase
         self::assertStringNotContainsString($token, print_r($viewmend, true));
         self::assertStringContainsString('[REDACTED]', print_r($viewmend, true));
     }
+
+    public function testSimpleClientAcceptsAnExplicitApiBaseUrl(): void
+    {
+        $viewmend = ViewMend::client(
+            token: 'vmt_' . bin2hex(random_bytes(16)),
+            apiBaseUrl: 'http://localhost:8080/api/v1',
+        );
+
+        self::assertInstanceOf(ViewMend::class, $viewmend);
+    }
 }

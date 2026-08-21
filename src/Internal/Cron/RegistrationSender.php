@@ -197,12 +197,14 @@ final readonly class RegistrationSender
         $method = $this->string($data, 'method', $response);
         $endpointUrl = $this->string($data, 'endpoint_url', $response);
         $endpoint = parse_url($endpointUrl);
+        $endpointScheme = is_array($endpoint) ? strtolower((string) ($endpoint['scheme'] ?? '')) : '';
+        $endpointHost = is_array($endpoint) ? (string) ($endpoint['host'] ?? '') : '';
         if (
             $method !== 'POST'
             || filter_var($endpointUrl, FILTER_VALIDATE_URL) === false
             || ! is_array($endpoint)
-            || strtolower((string) ($endpoint['scheme'] ?? '')) !== 'https'
-            || ! is_string($endpoint['host'] ?? null)
+            || ($endpointScheme !== 'https' && ! $this->isLoopbackHttpEndpoint($endpointScheme, $endpointHost))
+            || $endpointHost === ''
             || isset($endpoint['user'])
             || isset($endpoint['pass'])
         ) {
@@ -228,6 +230,31 @@ final readonly class RegistrationSender
             consecutiveFailures: $failures,
             updatedAt: $this->nullableDate($data, 'updated_at', $response),
         );
+    }
+
+    private function isLoopbackHttpEndpoint(string $scheme, string $host): bool
+    {
+        if ($scheme !== 'http') {
+            return false;
+        }
+
+        $host = strtolower(trim($host, '[]'));
+        if (
+            $host === 'localhost'
+            || str_ends_with($host, '.localhost')
+            || $host === 'host.docker.internal'
+        ) {
+            return true;
+        }
+
+        $address = @inet_pton($host);
+        if ($address === false) {
+            return false;
+        }
+
+        return strlen($address) === 4
+            ? ord($address[0]) === 127
+            : $address === str_repeat("\0", 15) . "\1";
     }
 
     /** @param array<mixed> $data */

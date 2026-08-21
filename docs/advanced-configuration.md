@@ -42,7 +42,16 @@ The default Guzzle transport allows 3 seconds to establish a connection and 10 s
 
 ## Override the API base URL
 
-Tests and self-hosted installations can supply a versioned `apiBaseUrl` through the advanced factory:
+Self-hosted installations can supply a versioned `apiBaseUrl` while retaining the default transport:
+
+```php
+$viewmend = ViewMend::client(
+    token: $token,
+    apiBaseUrl: 'https://self-hosted.example/api/v1',
+);
+```
+
+Tests and applications with a managed HTTP stack can pass the same value through the advanced factory:
 
 ```php
 $viewmend = ViewMend::withPsr18(
@@ -55,3 +64,5 @@ $viewmend = ViewMend::withPsr18(
 ```
 
 The version prefix belongs in `apiBaseUrl`. A Site Tracker request appends `/site-tracker/integrations/{integration}/events` to that base URL.
+
+Cron callback URLs must use HTTPS. HTTP is accepted only for loopback hosts and `host.docker.internal`, so local development remains possible without weakening production callback validation.

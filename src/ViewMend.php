@@ -36,8 +36,10 @@ final readonly class ViewMend
     ) {
     }
 
-    public static function client(#[\SensitiveParameter] string $token): self
-    {
+    public static function client(
+        #[\SensitiveParameter] string $token,
+        string $apiBaseUrl = self::PRODUCTION_API_BASE_URL,
+    ): self {
         $factory = new HttpFactory();
 
         return self::withPsr18(
@@ -45,6 +47,7 @@ final readonly class ViewMend
             httpClient: DefaultGuzzleClientFactory::create(),
             requestFactory: $factory,
             streamFactory: $factory,
+            apiBaseUrl: $apiBaseUrl,
         );
     }
 

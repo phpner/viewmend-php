@@ -9,6 +9,7 @@ use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7\Response;
 use PHPUnit\Framework\TestCase;
 use ViewMend\Exception\TokenScopeException;
+use ViewMend\Exception\UnexpectedResponseException;
 use ViewMend\Exception\UnprocessableRegistrationException;
 use ViewMend\Tests\Support\SequenceHttpClient;
 use ViewMend\ViewMend;
@@ -77,6 +78,47 @@ final class CronRegistrationContractTest extends TestCase
         self::assertTrue($http->isExhausted());
     }
 
+    public function testAcceptsAnHttpCallbackOnlyForLocalDevelopment(): void
+    {
+        $http = new SequenceHttpClient([$this->successResponse(
+            200,
+            'http://127.0.0.1/viewmend/auto-replies/cron',
+            '127.0.0.1',
+        )]);
+
+        $result = $this->sdk($http, $this->token())->cron()->current();
+
+        self::assertNotNull($result);
+        self::assertSame('http://127.0.0.1/viewmend/auto-replies/cron', $result->endpointUrl);
+    }
+
+    public function testAcceptsTheDockerHostAliasForLocalDevelopment(): void
+    {
+        $http = new SequenceHttpClient([$this->successResponse(
+            200,
+            'http://host.docker.internal:8079/viewmend/auto-replies/cron',
+            '127.0.0.1',
+        )]);
+
+        $result = $this->sdk($http, $this->token())->cron()->current();
+
+        self::assertNotNull($result);
+        self::assertSame('http://host.docker.internal:8079/viewmend/auto-replies/cron', $result->endpointUrl);
+    }
+
+    public function testRejectsAnInsecurePublicCallbackUrl(): void
+    {
+        $http = new SequenceHttpClient([$this->successResponse(
+            200,
+            'http://example.com/wp-json/viewmend/v1/cron',
+        )]);
+
+        $this->expectException(UnexpectedResponseException::class);
+        $this->expectExceptionMessage('malformed Cron response');
+
+        $this->sdk($http, $this->token())->cron()->current();
+    }
+
     public function testMapsInvalidRegistrationWithoutExposingServerBody(): void
     {
         $secret = 'do-not-expose-this-server-value';
@@ -136,15 +178,18 @@ final class CronRegistrationContractTest extends TestCase
         );
     }
 
-    private function successResponse(int $status): Response
-    {
+    private function successResponse(
+        int $status,
+        string $endpointUrl = 'https://example.com/wp-json/viewmend/v1/cron',
+        string $domain = 'example.com',
+    ): Response {
         return new Response($status, ['Content-Type' => 'application/json'], json_encode([
             'data' => [
                 'id' => 'cron_' . str_repeat('c', 26),
                 'connection_id' => 'cronconn_' . str_repeat('a', 26),
-                'domain' => 'example.com',
+                'domain' => $domain,
                 'endpoint_path' => '/wp-json/viewmend/v1/cron',
-                'endpoint_url' => 'https://example.com/wp-json/viewmend/v1/cron',
+                'endpoint_url' => $endpointUrl,
                 'method' => 'POST',
                 'plugin' => ['id' => 'viewmend-wordpress', 'version' => '1.2.0'],
                 'schedule' => ['cron' => '*/15 * * * *', 'timezone' => 'Europe/London'],

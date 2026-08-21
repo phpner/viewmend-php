@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format follows Keep a Changelog.
 
+## 1.1.1 - 2026-08-21
+
+### Added
+
+- Optional API base URL argument on `ViewMend::client()` for self-hosted and local ViewMend installations.
+- HTTP callback support limited to loopback hosts and `host.docker.internal` for local development.
+
 ## 1.1.0 - 2026-08-21
 
 ### Added
