@@ -24,7 +24,6 @@ use ViewMend\Internal\Retry\SystemClock;
 use ViewMend\Internal\SiteTracker\EventSender;
 use ViewMend\Internal\SiteTracker\IntegrationId;
 use ViewMend\SiteTracker\SiteTrackerClient;
-use ViewMend\Cron\CallbackVerifier;
 use ViewMend\Cron\CronClient;
 
 final readonly class ViewMend
@@ -91,7 +90,7 @@ final readonly class ViewMend
 
         return new CronClient(
             new RegistrationSender($this->transport),
-            CallbackVerifier::fromToken($this->token->reveal()),
+            $this->token,
         );
     }
 }

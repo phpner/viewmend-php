@@ -56,6 +56,8 @@ Cron callback verification intentionally sits outside the outbound HTTP transpor
 
 The unreleased `pluginCron()` and `connectionKey` draft names were rejected because they exposed an unnecessary plugin-specific client concept. The supported contract keeps `ViewMend::client(token: ...)` unchanged and exposes the isolated module through `cron()`. This decision does not change the Site Tracker API or its resource path.
 
+Authentication remains module-scoped even though every module uses the same `token` parameter name. The Cron server rejects the Site Tracker `vmt_` format with `token_scope_invalid`, and the SDK maps only that stable error code to `TokenScopeException`. It never treats the scope response as proof that the supplied Site Tracker token exists.
+
 ## Transport construction
 
 `ViewMend::client(token: ...)` creates Guzzle and its PSR-17 factories internally. Guzzle is a production dependency, so consumers do not need to select or configure a transport for the default workflow.

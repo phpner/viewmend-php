@@ -16,6 +16,8 @@ The plugin registers:
 
 The plugin does not register a host, method, custom headers, or custom request body. ViewMend combines the stored domain with the path, requires HTTPS, and always sends `POST`.
 
+Cron connection tokens and Site Tracker API tokens have separate scopes. Passing a `vmt_` Site Tracker token to a Cron operation returns `401 token_scope_invalid`; the SDK maps it to `TokenScopeException`. This classification uses only the token format and does not confirm that the supplied Site Tracker token exists or is valid.
+
 ## Registration
 
 ```php

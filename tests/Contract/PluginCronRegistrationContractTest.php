@@ -8,6 +8,7 @@ use JsonException;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7\Response;
 use PHPUnit\Framework\TestCase;
+use ViewMend\Exception\TokenScopeException;
 use ViewMend\Exception\UnprocessableRegistrationException;
 use ViewMend\Tests\Support\SequenceHttpClient;
 use ViewMend\ViewMend;
@@ -94,6 +95,32 @@ final class PluginCronRegistrationContractTest extends TestCase
         } catch (UnprocessableRegistrationException $exception) {
             self::assertSame(422, $exception->statusCode);
             self::assertStringNotContainsString($secret, $exception->getMessage());
+        }
+    }
+
+    public function testMapsSiteTrackerTokenToDedicatedScopeError(): void
+    {
+        $serverMessage = 'do-not-trust-or-expose-this-server-message';
+        $http = new SequenceHttpClient([
+            new Response(401, ['Content-Type' => 'application/json'], json_encode([
+                'error' => [
+                    'code' => 'token_scope_invalid',
+                    'message' => $serverMessage,
+                ],
+            ], JSON_THROW_ON_ERROR)),
+        ]);
+
+        try {
+            $this->sdk($http, 'vmt_' . str_repeat('x', 32))->cron()->current();
+            self::fail('Expected the Site Tracker token to be rejected by Cron.');
+        } catch (TokenScopeException $exception) {
+            self::assertSame(401, $exception->statusCode);
+            self::assertSame(
+                'This token is for the Site Tracker API and cannot be used with the Cron API. '
+                    . 'Use the connection token issued in Integrations.',
+                $exception->getMessage(),
+            );
+            self::assertStringNotContainsString($serverMessage, $exception->getMessage());
         }
     }
 

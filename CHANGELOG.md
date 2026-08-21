@@ -11,6 +11,7 @@ The format follows Keep a Changelog.
 - Cron registration client for creating, reading, and disabling a plugin-managed schedule.
 - Signed callback verification with timestamp freshness, connection binding, and verification challenge handling.
 - Typed Cron registration and callback values with contract tests and at-least-once delivery guidance.
+- Dedicated `TokenScopeException` for Site Tracker-formatted tokens rejected by the Cron API without token-existence disclosure.
 
 ### Changed
 

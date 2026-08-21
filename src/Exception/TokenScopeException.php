@@ -4,6 +4,6 @@ declare(strict_types=1);
 
 namespace ViewMend\Exception;
 
-class AuthenticationException extends ApiException
+final class TokenScopeException extends AuthenticationException
 {
 }

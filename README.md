@@ -145,7 +145,8 @@ printf(
 
 All SDK failures extend `ViewMend\Exception\ViewMendException`. Significant API statuses have dedicated exception types:
 
-- `AuthenticationException` for 401
+- `TokenScopeException` when a Site Tracker token is passed to the Cron API
+- `AuthenticationException` for other 401 responses
 - `EndpointDisabledException` for 410
 - `PayloadTooLargeException` for 413
 - `UnprocessableEventException` for 422

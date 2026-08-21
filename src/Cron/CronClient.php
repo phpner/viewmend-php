@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace ViewMend\Cron;
 
 use ViewMend\Cron\Response\RegistrationResult;
+use ViewMend\Internal\Config\ApiToken;
 use ViewMend\Internal\PluginCron\RegistrationSender;
 
 final readonly class CronClient
@@ -12,7 +13,7 @@ final readonly class CronClient
     /** @internal */
     public function __construct(
         private RegistrationSender $registrations,
-        private CallbackVerifier $callbacks,
+        private ApiToken $token,
     ) {
     }
 
@@ -49,6 +50,6 @@ final readonly class CronClient
      */
     public function verifyCallback(array $headers, string $rawBody): Callback
     {
-        return $this->callbacks->verify($headers, $rawBody);
+        return CallbackVerifier::fromToken($this->token->reveal())->verify($headers, $rawBody);
     }
 }
