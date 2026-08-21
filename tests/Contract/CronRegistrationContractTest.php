@@ -13,7 +13,7 @@ use ViewMend\Exception\UnprocessableRegistrationException;
 use ViewMend\Tests\Support\SequenceHttpClient;
 use ViewMend\ViewMend;
 
-final class PluginCronRegistrationContractTest extends TestCase
+final class CronRegistrationContractTest extends TestCase
 {
     /** @throws JsonException */
     public function testRegistersExactCronContractAndParsesResponse(): void

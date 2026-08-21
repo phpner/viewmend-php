@@ -150,7 +150,7 @@ try {
 
 `current()` calls `GET /api/v1/cron/registration` and returns `null` only when no registration exists. ViewMend is the source of truth. A plugin may keep the last successful response for temporary offline display, but it must not let that cache overwrite a later server response, and it must never cache or log the connection token as part of the settings snapshot. Catch `TokenScopeException` before `AuthenticationException` because it is the more specific authentication failure.
 
-`disable()` pauses the saved schedule. See the complete [settings synchronization contract](docs/plugin-cron.md#loading-saved-settings).
+`disable()` pauses the saved schedule. See the complete [settings synchronization contract](docs/cron.md#loading-saved-settings).
 
 The callback must verify the signature against the exact raw request body before processing it:
 
@@ -166,7 +166,7 @@ if ($callback->isVerification()) {
 }
 ```
 
-Cron delivery is at least once: a transient failure can cause the same `runId` to be delivered again with a higher `attempt`. Store completed run IDs before repeating side effects. See the complete [Cron integration contract for plugins](docs/plugin-cron.md).
+Cron delivery is at least once: a transient failure can cause the same `runId` to be delivered again with a higher `attempt`. Store completed run IDs before repeating side effects. See the complete [Cron integration contract for plugins](docs/cron.md).
 
 ## Handle the result
 

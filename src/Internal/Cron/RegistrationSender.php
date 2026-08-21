@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace ViewMend\Internal\PluginCron;
+namespace ViewMend\Internal\Cron;
 
 use DateTimeImmutable;
 use Exception;
@@ -21,7 +21,7 @@ final readonly class RegistrationSender
 
     public function __construct(
         private TransportInterface $transport,
-        private PluginCronApiErrorMapper $errors = new PluginCronApiErrorMapper(),
+        private CronApiErrorMapper $errors = new CronApiErrorMapper(),
     ) {
     }
 

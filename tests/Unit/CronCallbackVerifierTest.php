@@ -12,7 +12,7 @@ use ViewMend\Cron\Callback;
 use ViewMend\Cron\CallbackVerifier;
 use ViewMend\ViewMend;
 
-final class PluginCronCallbackVerifierTest extends TestCase
+final class CronCallbackVerifierTest extends TestCase
 {
     /** @throws JsonException */
     public function testCronClientVerifiesCallbackWithTheSameToken(): void

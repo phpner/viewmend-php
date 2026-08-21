@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace ViewMend\Internal\PluginCron;
+namespace ViewMend\Internal\Cron;
 
 use JsonException;
 use ViewMend\Exception\ApiException;
@@ -16,7 +16,7 @@ use ViewMend\Exception\UnprocessableRegistrationException;
 use ViewMend\Internal\Http\HttpResponse;
 
 /** @internal */
-final class PluginCronApiErrorMapper
+final class CronApiErrorMapper
 {
     public function fromResponse(HttpResponse $response): ApiException
     {

@@ -6,7 +6,7 @@ namespace ViewMend\Cron;
 
 use ViewMend\Cron\Response\RegistrationResult;
 use ViewMend\Internal\Config\ApiToken;
-use ViewMend\Internal\PluginCron\RegistrationSender;
+use ViewMend\Internal\Cron\RegistrationSender;
 
 final readonly class CronClient
 {
