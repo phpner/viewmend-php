@@ -109,7 +109,48 @@ $registration = $cron->register(
 );
 ```
 
-The registration request sends only an endpoint path. ViewMend combines that path with the connected domain and always calls it using HTTPS `POST`. `current()` reads the existing registration and returns `null` when none exists; `disable()` pauses it. Registering a new or changed path starts endpoint verification before normal runs begin.
+The registration request sends only an endpoint path. ViewMend combines that path with the connected domain and always calls it using HTTPS `POST`. The returned `RegistrationResult` contains the saved settings and current server state, so the plugin can update its form immediately. Registering a new or changed path starts endpoint verification before normal runs begin.
+
+### Load saved Cron settings
+
+When the plugin settings screen opens, use the saved token to load the authoritative settings from ViewMend:
+
+```php
+use ViewMend\Exception\AuthenticationException;
+use ViewMend\Exception\EndpointDisabledException;
+use ViewMend\Exception\NetworkException;
+use ViewMend\Exception\ServerException;
+use ViewMend\Exception\TokenScopeException;
+use ViewMend\ViewMend;
+
+$cron = ViewMend::client(token: $token)->cron();
+
+try {
+    $settings = $cron->current();
+
+    if ($settings === null) {
+        // No schedule has been registered. Show the initial settings form.
+    } else {
+        $cronExpression = $settings->cron;
+        $timezone = $settings->timezone;
+        $enabled = $settings->enabled;
+
+        // Display server state such as $settings->status and $settings->nextRunAt read-only.
+    }
+} catch (TokenScopeException) {
+    // A Site Tracker token was pasted into the Cron settings.
+} catch (AuthenticationException) {
+    // The Cron connection token is invalid or has been rotated.
+} catch (EndpointDisabledException) {
+    // The ViewMend connection is disabled.
+} catch (NetworkException|ServerException) {
+    // ViewMend is temporarily unavailable. Show a clearly marked cached snapshot if one exists.
+}
+```
+
+`current()` calls `GET /api/v1/cron/registration` and returns `null` only when no registration exists. ViewMend is the source of truth. A plugin may keep the last successful response for temporary offline display, but it must not let that cache overwrite a later server response, and it must never cache or log the connection token as part of the settings snapshot. Catch `TokenScopeException` before `AuthenticationException` because it is the more specific authentication failure.
+
+`disable()` pauses the saved schedule. See the complete [settings synchronization contract](docs/plugin-cron.md#loading-saved-settings).
 
 The callback must verify the signature against the exact raw request body before processing it:
 

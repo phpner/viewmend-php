@@ -37,6 +37,68 @@ The server validates a minimum interval, verifies DNS and the destination networ
 
 `current()` returns the typed registration or `null` when the plugin has not registered one. `disable()` idempotently pauses the schedule.
 
+## Loading saved settings
+
+ViewMend is the source of truth for the registered schedule. The plugin should keep the connection token locally and call `current()` whenever its settings screen opens:
+
+```php
+use ViewMend\Exception\AuthenticationException;
+use ViewMend\Exception\EndpointDisabledException;
+use ViewMend\Exception\NetworkException;
+use ViewMend\Exception\ServerException;
+use ViewMend\Exception\TokenScopeException;
+use ViewMend\ViewMend;
+
+$cron = ViewMend::client(token: $token)->cron();
+
+try {
+    $settings = $cron->current();
+
+    if ($settings === null) {
+        // First setup: show defaults and let the user create a schedule.
+    } else {
+        $form = [
+            'cron' => $settings->cron,
+            'timezone' => $settings->timezone,
+            'enabled' => $settings->enabled,
+        ];
+
+        $serverState = [
+            'domain' => $settings->domain,
+            'endpoint' => $settings->endpointUrl,
+            'status' => $settings->status,
+            'verified_at' => $settings->verifiedAt,
+            'next_run_at' => $settings->nextRunAt,
+            'last_run_at' => $settings->lastRunAt,
+            'consecutive_failures' => $settings->consecutiveFailures,
+            'updated_at' => $settings->updatedAt,
+        ];
+    }
+} catch (TokenScopeException) {
+    // The supplied token has the Site Tracker format and cannot access Cron.
+} catch (AuthenticationException) {
+    // The Cron connection token is invalid or has been rotated.
+} catch (EndpointDisabledException) {
+    // The ViewMend connection is disabled.
+} catch (NetworkException|ServerException) {
+    // ViewMend is temporarily unavailable. Do not replace known settings with defaults.
+}
+```
+
+`current()` makes `GET /api/v1/cron/registration`. A `404 registration_not_found` response becomes `null`; authentication, scope, disabled-connection, network, and server failures remain exceptions and must not be treated as an empty schedule.
+
+Use `cron`, `timezone`, and `enabled` to populate editable controls. Treat `domain`, `endpointUrl`, `method`, `pluginId`, `pluginVersion`, `status`, verification and run times, and `consecutiveFailures` as server state. The known status values are:
+
+- `waiting_plugin`: the token was rotated and the plugin must save its settings again;
+- `pending_verification`: ViewMend is checking the callback;
+- `active`: the verified schedule can run;
+- `paused`: the schedule is disabled;
+- `verification_failed`: the callback did not complete verification.
+
+After the user saves, use the `RegistrationResult` returned by `register()` to refresh the form and status immediately; do not make a redundant `current()` request. A plugin may cache the last successful result for temporary offline display, but it must mark that snapshot as stale, replace it after the next successful response, and never include the connection token in the snapshot, logs, or diagnostics.
+
+Catch `TokenScopeException` before `AuthenticationException` because `TokenScopeException` extends it. If `current()` returns settings for a newer server update than the plugin's cached copy, the server response wins.
+
 ## Callback authentication
 
 ViewMend sends these headers:
