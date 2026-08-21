@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format follows Keep a Changelog.
 
+## Unreleased
+
+### Added
+
+- Plugin Cron registration client for creating, reading, and disabling a plugin-managed schedule.
+- Signed callback verification with timestamp freshness, connection binding, and verification challenge handling.
+- Typed Plugin Cron registration and callback values with contract tests and at-least-once delivery guidance.
+
 ## 1.0.0 - 2026-08-16
 
 ### Added

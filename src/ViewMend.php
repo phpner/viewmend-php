@@ -15,12 +15,14 @@ use ViewMend\Internal\Contracts\Http\TransportInterface;
 use ViewMend\Internal\Http\DefaultGuzzleClientFactory;
 use ViewMend\Internal\Http\Psr18Transport;
 use ViewMend\Internal\Http\RetryingTransport;
+use ViewMend\Internal\PluginCron\RegistrationSender;
 use ViewMend\Internal\Retry\ExponentialBackoffRetryPolicy;
 use ViewMend\Internal\Retry\NativeSleeper;
 use ViewMend\Internal\Retry\SystemClock;
 use ViewMend\Internal\SiteTracker\EventSender;
 use ViewMend\Internal\SiteTracker\IntegrationId;
 use ViewMend\SiteTracker\SiteTrackerClient;
+use ViewMend\PluginCron\PluginCronClient;
 
 final readonly class ViewMend
 {
@@ -74,5 +76,10 @@ final readonly class ViewMend
             $this->transport,
             new IntegrationId($integrationId),
         ));
+    }
+
+    public function pluginCron(): PluginCronClient
+    {
+        return new PluginCronClient(new RegistrationSender($this->transport));
     }
 }
