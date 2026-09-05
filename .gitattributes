@@ -1,0 +1,10 @@
+.* export-ignore
+AGENTS.md export-ignore
+CLAUDE.md export-ignore
+/tests export-ignore
+/vendor export-ignore
+/coverage export-ignore
+/composer.lock export-ignore
+/phpcs.xml.dist export-ignore
+/phpstan.neon.dist export-ignore
+/phpunit.xml.dist export-ignore

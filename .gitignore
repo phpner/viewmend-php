@@ -6,3 +6,8 @@
 /.phpunit.result.cache
 /coverage/
 .DS_Store
+/AGENTS.md
+/CLAUDE.md
+/.agents/
+/.claude/
+/.codex/

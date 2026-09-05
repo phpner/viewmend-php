@@ -1,6 +1,6 @@
 # Site Tracker dashboards and resources
 
-The custom Site Tracker integration API exposes two read-only endpoints using the same Bearer token as event delivery. These methods are available in the SDK's unreleased changes after 1.2.0.
+The custom Site Tracker integration API exposes two read-only endpoints using the same Bearer token as event delivery. These methods are available starting with SDK 1.3.0.
 
 ```php
 use ViewMend\ViewMend;
