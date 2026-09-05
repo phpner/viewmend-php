@@ -4,9 +4,11 @@ The ViewMend PHP SDK is the official framework-agnostic PHP client for ViewMend 
 
 ## Available modules
 
-### Site Tracker Events
+### Site Tracker
 
 PHP applications can send deployment events, content updates, cache clears, and maintenance activity to ViewMend, which connects that change context with subsequent checks of tracked pages in the Events and Timeline workflow.
+
+Applications can also read integration dashboards and paginated check resources using the same Site Tracker token.
 
 Learn more about [ViewMend Site Tracker for website change monitoring](https://viewmend.com/site-tracker).
 
@@ -89,6 +91,31 @@ $result = $viewmend
 For optional integration-declared `changed_fields` and `metadata`, see [Site Tracker event context](docs/event-context.md).
 
 Use an event ID that is unique and stable for the originating change. Safe retries send the identical serialized payload and the same event ID. If the server already accepted that ID, it returns a duplicate delivery instead of creating a second event.
+
+## Read the Site Tracker dashboard
+
+```php
+$tracker = $viewmend->siteTracker($integrationId);
+$dashboard = $tracker->dashboard(device: 'desktop');
+
+$healthScore = $dashboard->summary->healthScore; // null until data is available
+$attentionItems = $dashboard->needsAttention->items;
+
+if ($dashboard->latestCheck !== null) {
+    $resources = $tracker->resources(
+        runId: $dashboard->latestCheck->runId,
+        type: 'images',
+        device: $dashboard->scope->device,
+        perPage: 50,
+    );
+
+    foreach ($resources->items as $resource) {
+        // Use $resource->url, $resource->transferredBytes, and $resource->durationMs.
+    }
+}
+```
+
+`dashboard()` and `resources()` perform GET requests and return immutable typed responses. See [Site Tracker dashboards and resources](docs/dashboard.md) for page selection, pagination, missing data, and error handling.
 
 ## Register Cron
 
@@ -189,6 +216,8 @@ All SDK failures extend `ViewMend\Exception\ViewMendException`. Significant API 
 - `EndpointDisabledException` for 410
 - `PayloadTooLargeException` for 413
 - `UnprocessableEventException` for 422
+- `ResourceNotFoundException` for dashboard/resource 404 responses, including an out-of-scope page or run
+- `UnprocessableQueryException` for dashboard/resource 422 responses
 - `UnprocessableRegistrationException` for invalid Cron registration
 - `CallbackVerificationException` for an invalid or stale Cron callback
 - `RateLimitException` for exhausted 429 responses

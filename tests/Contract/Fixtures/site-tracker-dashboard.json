@@ -1,0 +1,164 @@
+{
+    "data": {
+        "site": {
+            "group_id": "123e4567-e89b-42d3-a456-426614174002",
+            "name": "Example site"
+        },
+        "scope": {
+            "device": "mobile",
+            "page": {
+                "id": "123e4567-e89b-42d3-a456-426614174000",
+                "url": "https://example.com/",
+                "last_checked_at": "2026-09-04T17:30:00+00:00"
+            },
+            "available_pages": [
+                {
+                    "id": "123e4567-e89b-42d3-a456-426614174000",
+                    "url": "https://example.com/",
+                    "last_checked_at": "2026-09-04T17:30:00+00:00"
+                },
+                {
+                    "id": "123e4567-e89b-42d3-a456-426614174003",
+                    "url": "https://example.com/pricing",
+                    "last_checked_at": null
+                }
+            ]
+        },
+        "summary": {
+            "health_score": 88,
+            "health_score_delta": -5,
+            "tracked_pages": 2,
+            "checked_pages": 1,
+            "open_issues": 3,
+            "critical_issues": 1
+        },
+        "latest_check": {
+            "run_id": "123e4567-e89b-42d3-a456-426614174001",
+            "status": "partial_completed",
+            "finished_at": "2026-09-04T17:30:00+00:00",
+            "has_comparison": true
+        },
+        "links": {
+            "issues": "/app/tracker/issues?device=mobile",
+            "issue_history": "/app/tracker/history?mode=issues",
+            "resource_history": "/app/tracker/history?mode=resources",
+            "performance_history": "/app/tracker/history?mode=performance"
+        },
+        "needs_attention": {
+            "total": 12,
+            "items": [
+                {
+                    "id": "finding:42",
+                    "source": "finding",
+                    "severity": "critical",
+                    "title": "Checkout link is broken",
+                    "message": null,
+                    "status": "detected",
+                    "page_id": "123e4567-e89b-42d3-a456-426614174000",
+                    "page_url": "https://example.com/",
+                    "occurred_at": "2026-09-04T17:30:00+00:00"
+                },
+                {
+                    "id": "content:43",
+                    "source": "content_change",
+                    "severity": "warning",
+                    "title": "New form detected",
+                    "message": "1 → 2",
+                    "status": "detected",
+                    "page_id": "123e4567-e89b-42d3-a456-426614174000",
+                    "page_url": "https://example.com/",
+                    "occurred_at": null
+                }
+            ]
+        },
+        "issue_trend": [
+            {
+                "run_id": "123e4567-e89b-42d3-a456-426614174001",
+                "finished_at": "2026-09-04T17:30:00+00:00",
+                "critical": 1,
+                "warning": 2
+            }
+        ],
+        "transfer": {
+            "available": true,
+            "run_id": "123e4567-e89b-42d3-a456-426614174001",
+            "total_bytes": 25000,
+            "reported_requests": 4,
+            "stored_requests": 2,
+            "truncated": true,
+            "unattributed_bytes": 6000,
+            "source": "snapshot_total_transfer_size",
+            "resource_endpoint": "https://viewmend.com/api/v1/site-tracker/integrations/integration-id/runs/123e4567-e89b-42d3-a456-426614174001/resources",
+            "categories": [
+                {
+                    "key": "images",
+                    "bytes": 16000,
+                    "requests": 1
+                },
+                {
+                    "key": "javascript",
+                    "bytes": 0,
+                    "requests": 0
+                },
+                {
+                    "key": "css",
+                    "bytes": 3000,
+                    "requests": 1
+                },
+                {
+                    "key": "other",
+                    "bytes": 6000,
+                    "requests": 0
+                }
+            ]
+        },
+        "resource_changes": {
+            "available": true,
+            "items": [
+                {
+                    "change_type": "modified",
+                    "resource_type": "css",
+                    "url": "https://example.com/app.css",
+                    "mime_type": "text/css",
+                    "before_bytes": 5000,
+                    "after_bytes": 3000,
+                    "delta_bytes": -2000,
+                    "before_status": 200,
+                    "after_status": 200
+                },
+                {
+                    "change_type": "added",
+                    "resource_type": "images",
+                    "url": "https://example.com/hero.webp",
+                    "mime_type": null,
+                    "before_bytes": null,
+                    "after_bytes": 16000,
+                    "delta_bytes": null,
+                    "before_status": null,
+                    "after_status": 200
+                }
+            ]
+        },
+        "performance_history": [
+            {
+                "run_id": "123e4567-e89b-42d3-a456-426614174001",
+                "finished_at": "2026-09-04T17:30:00+00:00",
+                "performance_score": 91,
+                "lcp_ms": 1200.5,
+                "cls": 0.03,
+                "total_blocking_time_ms": 0
+            },
+            {
+                "run_id": "previous-run",
+                "finished_at": null,
+                "performance_score": null,
+                "lcp_ms": null,
+                "cls": null,
+                "total_blocking_time_ms": null
+            }
+        ]
+    },
+    "meta": {
+        "generated_at": "2026-09-04T17:30:00+00:00"
+    }
+}

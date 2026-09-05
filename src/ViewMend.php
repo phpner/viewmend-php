@@ -22,6 +22,7 @@ use ViewMend\Internal\Retry\ExponentialBackoffRetryPolicy;
 use ViewMend\Internal\Retry\NativeSleeper;
 use ViewMend\Internal\Retry\SystemClock;
 use ViewMend\Internal\SiteTracker\EventSender;
+use ViewMend\Internal\SiteTracker\Dashboard\Reader;
 use ViewMend\Internal\SiteTracker\IntegrationId;
 use ViewMend\SiteTracker\SiteTrackerClient;
 use ViewMend\Cron\CronClient;
@@ -79,10 +80,12 @@ final readonly class ViewMend
 
     public function siteTracker(string $integrationId): SiteTrackerClient
     {
-        return new SiteTrackerClient(new EventSender(
-            $this->transport,
-            new IntegrationId($integrationId),
-        ));
+        $integration = new IntegrationId($integrationId);
+
+        return new SiteTrackerClient(
+            new EventSender($this->transport, $integration),
+            new Reader($this->transport, $integration),
+        );
     }
 
     public function cron(): CronClient

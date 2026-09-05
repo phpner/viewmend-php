@@ -12,7 +12,7 @@ Every PHP file uses strict types. The source tree uses PSR-4 and PSR-12.
 
 ## Product scope
 
-The repository is the general ViewMend SDK. Site Tracker Events and Cron are isolated product modules built on the same transport. Additional modules may be added only for documented API contracts.
+The repository is the general ViewMend SDK. Site Tracker and Cron are isolated product modules built on the same transport. Site Tracker includes event delivery and the documented integration dashboard/resource reads. Additional modules may be added only for documented API contracts.
 
 Laravel integration will live in `viewmend/laravel` and depend on this package. Laravel and WordPress code are outside this repository.
 
@@ -23,6 +23,7 @@ The supported public surface is intentionally small:
 - `ViewMend\ViewMend`: default client factory, advanced PSR factory, and module access.
 - `ViewMend\SiteTracker\SiteTrackerClient`, `Events`, and `PendingEvent`: fluent Site Tracker event construction.
 - `ViewMend\SiteTracker\Response\*`: typed delivery IDs, result, and forward-compatible queue status.
+- `SiteTrackerClient::dashboard()` and `resources()`: typed integration dashboard and paginated run resource reads.
 - `ViewMend\Cron\CronClient`: schedule registration, inspection, disabling, and callback verification.
 - `ViewMend\Cron\CallbackVerifier` and `Callback`: signed callback verification and typed delivery data.
 - `ViewMend\Cron\Response\RegistrationResult`: typed server registration state.
@@ -84,6 +85,8 @@ The resulting production endpoint is:
 
 `https://viewmend.com/api/v1/site-tracker/integrations/{integration}/events`
 
+Site Tracker also owns `/site-tracker/integrations/{integration}/dashboard` and `/site-tracker/integrations/{integration}/runs/{run}/resources`. Each ID is encoded as a single path segment, and query parameters use RFC 3986 encoding.
+
 The Cron module owns one relative resource path:
 
 `/cron/registration`
@@ -100,9 +103,21 @@ Internally, the fluent surface creates and evolves a validated immutable `SiteTr
 
 HTTP 202 represents a newly accepted event and HTTP 200 a duplicate delivery. Counts remain integers, `scheduled_for` becomes an immutable date-time, and unknown `queue_status` values are preserved by `QueueStatus`.
 
+## Site Tracker dashboard reads
+
+The read contract was checked against ViewMend's `SiteTrackerDashboardController`, `TrackedPageIntegrationDashboard`, `TrackedPageDashboardApiTest`, and `docs/tracker.md` at backend commit `ec28f1f0` (2026-09-05). The endpoints were introduced in `95dbcf5d`. They reuse the custom integration Bearer token and are scoped by the server to its Tracker group.
+
+The existing `siteTracker($integrationId)` object exposes `dashboard(pageId: ..., device: ...)` and `resources(runId: ..., type: ..., device: ..., page: ..., perPage: ...)`. This is an additive public API change; event and Cron callers keep their existing signatures. The `@internal` SiteTrackerClient constructor now receives the reader alongside the event sender.
+
+`Internal\SiteTracker\Dashboard\Reader` validates query parameters and performs safe GETs through the shared transport. `ResponseMapper` maps the server document into small readonly response objects. Its JSON field reader distinguishes objects from lists, requires documented fields even when nullable, rejects scalar coercion and invalid calendar timestamps, and ignores unknown additive fields. The API's empty `links: []` becomes a DashboardLinks object with null fields.
+
+Response strings such as status, severity, source, category, device, and change type remain open to future values. Request device/type filters are restricted to the values the current controller accepts. Typed collections validate their elements on construction; optional measurements retain null values and byte deltas remain signed. No DTO follows the server's resource endpoint or workspace links: subsequent inventory calls build paths from the configured API base, integration, and run ID.
+
+The new response classes are public API. No framework dependency, transport change, cache, automatic page iteration, or production dependency was added. Contract fixtures contain synthetic data matching the backend serializer and are exercised with mock PSR-18 clients, a frozen clock, and a recording sleeper.
+
 ## Retry and error semantics
 
-The initial request counts as attempt one. The default policy permits at most three total attempts. It retries explicitly safe event requests for PSR-18 network failures, HTTP 429, and transient 500/502/503/504 responses.
+The initial request counts as attempt one. The default policy permits at most three total attempts. It retries explicitly safe requests for PSR-18 network failures, HTTP 429, and transient 500/502/503/504 responses. Dashboard/resource GETs are safe to repeat and preserve the exact URI and query across attempts.
 
 `Retry-After` is honored in delta-seconds or HTTP-date form and bounded by the configured maximum delay. The identical serialized request and event ID are reused on every attempt.
 

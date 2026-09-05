@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format follows Keep a Changelog.
 
+## Unreleased
+
+### Added
+
+- Site Tracker `dashboard()` for integration health, page/device scope, attention items, issue trends, transfer composition, resource changes, and performance history.
+- Site Tracker `resources()` for a filtered, paginated run resource inventory, including stored/reported request counts and truncation metadata.
+- Immutable typed dashboard and resource responses with validated nested fields, nullable measurements, and RFC 3339 timestamps.
+- `ResourceNotFoundException` and `UnprocessableQueryException` for the new read endpoints, using the existing token-safe transport and safe GET retries.
+- Dashboard usage documentation and offline wire-contract coverage for successful, empty, malformed, rate-limited, and failed reads.
+
 ## 1.2.0 - 2026-08-21
 
 ### Added

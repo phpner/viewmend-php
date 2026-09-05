@@ -1,0 +1,48 @@
+{
+    "data": {
+        "run": {
+            "id": "123e4567-e89b-42d3-a456-426614174001",
+            "page_id": "123e4567-e89b-42d3-a456-426614174000",
+            "page_url": "https://example.com/",
+            "finished_at": "2026-09-04T17:30:00+00:00"
+        },
+        "type": "images",
+        "device": "mobile",
+        "summary": {
+            "requests": 4,
+            "transferred_bytes": 21000,
+            "stored_requests": 4,
+            "reported_requests": 6,
+            "truncated": true
+        },
+        "items": [
+            {
+                "url": "https://example.com/hero.webp",
+                "mime_type": "image/webp",
+                "status_code": 200,
+                "transferred_bytes": 16000,
+                "duration_ms": 45.25,
+                "third_party": false,
+                "render_blocking": true
+            },
+            {
+                "url": "https://cdn.example.com/logo.svg",
+                "mime_type": null,
+                "status_code": null,
+                "transferred_bytes": null,
+                "duration_ms": null,
+                "third_party": true,
+                "render_blocking": false
+            }
+        ],
+        "pagination": {
+            "page": 2,
+            "per_page": 2,
+            "total": 4,
+            "last_page": 2
+        }
+    },
+    "meta": {
+        "generated_at": "2026-09-04T17:30:00.123456Z"
+    }
+}
