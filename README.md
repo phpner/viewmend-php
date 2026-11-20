@@ -2,6 +2,8 @@
 
 The ViewMend PHP SDK is the official framework-agnostic PHP client for ViewMend APIs. It provides shared authentication and configuration, a production-ready HTTP transport, safe retries, typed errors, and isolated product modules for integrating PHP applications with the [ViewMend website monitoring platform](https://viewmend.com/).
 
+ViewMend also offers free one-page checks that need no integration: the [website SEO checker](https://viewmend.com/seo-checker) reviews indexability, titles, descriptions, headings and structured data, and the [website spell checker](https://viewmend.com/page-text-review) finds spelling and grammar errors in published page text.
+
 ## Available modules
 
 ### Site Tracker
